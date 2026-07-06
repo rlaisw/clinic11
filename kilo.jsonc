@@ -1,0 +1,31 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  
+  "mcp": {
+    "codebase-memory-mcp": {
+      "type": "local",
+      "command": "C:/codebase-memory-mcp/codebase-memory-mcp.exe",
+      "args": [],
+      "env": {},
+      "enabled": true,
+      "mcp_timeout": 120000,
+      "alwaysAllow": ["*"]
+    },
+    "cocoindex-code": {
+      "type": "local",
+      "command": ["ccc", "mcp"],
+      "enabled": true,
+      "mcp_timeout": 120000,
+      "alwaysAllow": ["*"]
+    }
+  },
+  
+  "experimental": {
+    "codebase_search": true,
+    "mcp_timeout": 120000
+  },
+  
+  "permission": {
+    "bash": "allow"
+  }
+}

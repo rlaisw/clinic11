@@ -8,6 +8,10 @@
     "dist"
   ],
   "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
     "./styles.css": "./dist/index.css",
     "./*": "./dist/*.js"
   },

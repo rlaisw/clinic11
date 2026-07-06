@@ -1,58 +1,54 @@
-# Turborepo Tailwind CSS starter
+# Turborepo Tailwind CSS Starter
 
 This Turborepo starter is maintained by the Turborepo core team.
 
-## Using this example
+## Project Overview
 
-Run the following command:
+A full-stack project with React/Next.js frontend and Django backend integrated with Tailwind CSS.
 
+## Tech Stack
+
+### Frontend (React/Next.js)
+- **Core Framework**: React 19.2.0, Next.js 16.2.0
+- **UI Libraries**: Shadcn UI 0.0.0.0.4, Tailwind CSS 3.4.19, Shadcn 4.10.0
+- **State Management**: Tanstack Query 5.101.0
+- **Theme System**: 4 modes - Dark / Light / Light Blue / Light Green
+- **Utilities**: Axios 1.17.0 (HTTP), Lodash 4.*, Jest 27+, ESLint, Prettier
+
+### Backend (Python/Django)
+- **Framework**: Django 6.0.6
+- **API**: DRF 3.17.1 + SimpleJWT 5.5.1
+- **ORM**: PostgreSQL (primary), SQLite (dev)
+- **Additional**: DRF-CORS 4.9.0, Django-Htmx 1.27.0, Django-Cotton 2.7.2
+
+### Shared Dependencies
+- Axios (HTTP client)
+- Jest (testing), ESLint (linting), Prettier (formatting)
+
+### Infrastructure
+- PostgreSQL (primary DB), Redis/Memcached (caching)
+- Docker (containerization), Git (version control), Celery (background tasks), Sentry (logging)
+
+## Theme System
+
+The application supports 4 theme modes with full persistence:
+
+1. **Dark** - Default dark theme
+2. **Light** - Clean light theme
+3. **Light Blue** - Blue-tinted light theme
+4. **Light Green** - Green-tinted light theme
+
+### Theme Implementation
+- Theme context provider in `apps/web/contexts/theme-context.tsx`
+- Theme toggle component in `apps/web/components/theme-toggle.tsx`
+- Theme variables defined in `apps/web/app/globals.css`
+- Theme persistence via localStorage and URL parameters
+- Tailwind CSS custom color palette for light-blue and light-green
+
+### Usage
 ```sh
 npx create-turbo@latest -e with-tailwind
 ```
 
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Building packages/ui
-
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
-
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
-
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
-
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
-
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
-
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Dependencies
+- Full list in `backend/requirements.txt` and `apps/web/package.json`

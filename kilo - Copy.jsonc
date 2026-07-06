@@ -1,0 +1,23 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  
+  "mcp": {
+    "codebase-memory-mcp": {
+      "type": "local",
+      "command": "C:/codebase-memory-mcp/codebase-memory-mcp.exe",
+      "args": [],
+      "env": {},
+      "enabled": true,
+      "alwaysAllow": ["*"]
+    }
+  },
+  
+  "experimental": {
+    "codebase_search": true,
+    "mcp_timeout": 120000
+  },
+  
+  "permission": {
+    "bash": "allow"
+  }
+}

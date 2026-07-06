@@ -34,3 +34,5 @@ yarn-error.log*
 
 # ui
 dist/
+# CocoIndex Code (ccc)
+/.cocoindex_code/

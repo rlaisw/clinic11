@@ -1,0 +1,33 @@
+# Clinic11 Project Constitution
+
+## Tech Stack Lock
+- **Frozen Stack**:
+  - Frontend: React 19.2.0 + Next.js 16.2.0 + Tailwind CSS 3.4.19 + Shadcn UI 0.0.4 + Radix UI 2.1.x + Theme Modes (Dark/Light/Blue/Green)
+  - Backend: Django 6.0.6 + Django REST Framework 3.17.1 + DRF SimpleJWT 5.5.1
+  - Database: SQLite
+  - Infrastructure: বর্তমানে, Docker/Docker Compose + Redis/Memcached
+
+- **Rules**:
+  1. No new frameworks/libraries without explicit human approval
+  2. Follow existing folder structure and naming conventions
+  3.максимumdependency changes require human review
+
+## Code Quality
+- Follow ESLint/Prettier configurations in `@repo/eslint-config`
+
+## Architecture
+- Integrate with existing data models/API contracts
+- No refactoring of legacy code unless requested
+- Extend rather than replace existing code
+- Respect module boundaries
+
+## Documentation
+- Update `README.md` and `.specify/memory/constitution.md` for new features
+- Update `TECH_STACK.md` for new changes
+- Clerify environment variables/configurations (e.g., `THEME_MODE=dark`)
+- Add inline docs for significant logic
+
+## Environment Details
+- Current time: 2026-07-06T16:15:43+08:00
+- Working directory: C:\kilocode\clinic11
+- Workspace root folder: C:\kilocode\clinic11

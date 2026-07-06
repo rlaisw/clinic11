@@ -1,0 +1,274 @@
+openapi: 3.0.0
+info:
+  title: Clinic Medication API
+  description: API for managing medication inventory in clinic workflows
+  version: 1.0.0
+  contact:
+    name: Clinic API Support
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Development server
+
+paths:
+  /medications/:
+    get:
+      summary: List all medications
+      description: Retrieve paginated list of medications with filtering by category and stock status
+      operationId: listMedications
+      parameters:
+        - name: category
+          in: query
+          description: Filter by medication category
+          schema:
+            type: string
+        - name: stock_status
+          in: query
+          description: Filter by stock status
+          schema:
+            type: string
+            enum: [OUT_OF_STOCK, LOW_STOCK, NORMAL_STOCK, HIGH_STOCK, EXPIRING_SOON]
+        - name: search
+          in: query
+          description: Search by medication name
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Medication'
+    post:
+      summary: Create new medication
+      operationId: createMedication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationInput'
+      responses:
+        '201':
+          description: Medication created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medication'
+
+  /medications/{id}/:
+    get:
+      summary: Get medication details
+      operationId: getMedication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Medication'
+    put:
+      summary: Update medication
+      operationId: updateMedication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationInput'
+      responses:
+        '200':
+          description: Medication updated
+    delete:
+      summary: Delete medication
+      operationId: deleteMedication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Medication deleted
+
+  /medications/alerts/:
+    get:
+      summary: Get stock alerts
+      description: Retrieve all low stock and expiring soon alerts
+      operationId: getAlerts
+      responses:
+        '200':
+          description: Alerts list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StockAlert'
+
+components:
+  schemas:
+    Medication:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        generic_name:
+          type: string
+        category:
+          type: string
+        dosage_strength:
+          type: string
+        administration_route:
+          type: string
+        stock_value:
+          type: integer
+        min_stock_level:
+          type: integer
+        max_stock_level:
+          type: integer
+        unit_cost:
+          type: number
+          format: decimal
+        total_value:
+          type: number
+          format: decimal
+        expiry_date:
+          type: string
+          format: date
+        supplier_name:
+          type: string
+        supplier_contact:
+          type: string
+        supplier_email:
+          type: string
+        supplier_phone:
+          type: string
+        supplier_address:
+          type: string
+        side_effects:
+          type: string
+        contraindications:
+          type: string
+        warnings:
+          type: string
+        is_active:
+          type: boolean
+        stock_status:
+          type: string
+          enum: [OUT_OF_STOCK, LOW_STOCK, NORMAL_STOCK, HIGH_STOCK, EXPIRING_SOON]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MedicationInput:
+      type: object
+      required:
+        - name
+        - category
+        - unit
+        - strength
+        - dosage_strength
+        - administration_route
+        - stock_value
+        - min_stock_level
+        - max_stock_level
+        - unit_cost
+        - expiry_date
+        - supplier_name
+        - supplier_contact
+      properties:
+        name:
+          type: string
+        generic_name:
+          type: string
+        category:
+          type: string
+        unit:
+          type: string
+        strength:
+          type: number
+        dosage_strength:
+          type: string
+        administration_route:
+          type: string
+        dosage_instructions:
+          type: object
+        stock_value:
+          type: integer
+        min_stock_level:
+          type: integer
+        max_stock_level:
+          type: integer
+        unit_cost:
+          type: number
+        expiry_date:
+          type: string
+          format: date
+        batch_number:
+          type: string
+        manufacturing_date:
+          type: string
+          format: date
+        supplier_name:
+          type: string
+        supplier_contact:
+          type: string
+        supplier_email:
+          type: string
+        supplier_phone:
+          type: string
+        supplier_address:
+          type: string
+        side_effects:
+          type: string
+        contraindications:
+          type: string
+        warnings:
+          type: string
+        is_active:
+          type: boolean
+        requires_refrigeration:
+          type: boolean
+
+    StockAlert:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [LOW_STOCK, EXPIRING_SOON, OUT_OF_STOCK]
+        medication:
+          type: string
+        dosage:
+          type: string
+        details:
+          type: string
+        count:
+          type: integer
+        expiry_date:
+          type: string
+          format: date

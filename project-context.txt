@@ -1,0 +1,53 @@
+### PACKAGE.JSON ###
+{
+  "name": "with-tailwind",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.6.0",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "turbo": "^2.9.16"
+  },
+  "packageManager": "pnpm@10.19.0",
+  "engines": {
+    "node": ">=18"
+  }
+}
+
+
+### FOLDER STRUCTURE (Top 2 Levels) ###
+├── README.md
+├── apps
+│   ├── docs
+│   └── web
+├── backend
+│   ├── api
+│   ├── config
+│   ├── db.sqlite3
+│   ├── manage.py
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── requirements.txt
+│   ├── static
+│   ├── tailwind.config.js
+│   └── venv
+├── package.json
+├── packages
+│   ├── eslint-config
+│   ├── tailwind-config
+│   ├── typescript-config
+│   └── ui
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+└── turbo.json
+
+### NEXT CONFIG ###
+
+### TSCONFIG.JSON ###
