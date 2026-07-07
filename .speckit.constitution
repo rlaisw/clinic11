@@ -5,12 +5,12 @@
   - Frontend: React 19.2.0 + Next.js 16.2.0 + Tailwind CSS 3.4.19 + Shadcn UI 0.0.4 + Radix UI 2.1.x + Theme Modes (Dark/Light/Blue/Green)
   - Backend: Django 6.0.6 + Django REST Framework 3.17.1 + DRF SimpleJWT 5.5.1
   - Database: SQLite
-  - Infrastructure: বর্তমানে, Docker/Docker Compose + Redis/Memcached
+  - Infrastructure: Currently, Docker/Docker Compose + Redis/Memcached
 
 - **Rules**:
    1. No new frameworks/libraries without explicit human approval
    2. Follow existing folder structure and naming conventions
-   3.максимumdependency changes require human review
+   3. Maximum dependency changes require human review
    4. Docker containers must be built and run according to `docker-compose.yml` specifications
    5. All environment variables must be declared in `.env` files and loaded with `python-dotenv` in Python
 
@@ -23,18 +23,22 @@
 - Extend rather than replace existing code
 - Respect module boundaries
 
+## Language
+- English is the default and primary language for all project documentation, code comments, commit messages, and communication.
+- All new documentation and user-facing content MUST be written in English.
+- Non-English content encountered in existing files should be translated or removed when that file is updated.
+
 ## Documentation
 - Update `README.md` and `.specify/memory/constitution.md` for new features
 - Update `TECH_STACK.md` for new changes
-- Clerify environment variables/configurations (e.g., `THEME_MODE=dark`)
+- Clarify environment variables/configurations (e.g., `THEME_MODE=dark`)
 - Add inline docs for significant logic
 
 ## Environment Details
 - Current time: 2026-07-07T12:56:00+08:00
 - Working directory: C:\kilocode\clinic11
 - Workspace root folder: C:\kilocode\clinic11
-- OS: Windows 11 (development). Use proper PowerShell syntax in Shell.
-- OS: Windows 11 (development). pwsh is not recognized as the name of a cmdlet, use powershell instead pwsh
+- OS: Windows 11 (development). Use PowerShell (not `pwsh`) in Shell.
 - Tech Stack: documented at project root `TECH_STACK.md`
 
 ## MCP Tool Usage (Mandatory for Token Efficiency)
