@@ -33,14 +33,15 @@ A full-stack project with React/Next.js frontend and Django backend integrated w
 
 The application supports 4 theme modes with full persistence:
 
-1. **Dark** - Default dark theme
-2. **Light** - Clean light theme
-3. **Light Blue** - Blue-tinted light theme
-4. **Light Green** - Green-tinted light theme
+1. **Dark** - Default dark theme (selector label: Dark)
+2. **Light** - Clean light theme (selector label: White)
+3. **Light Blue** - Blue-tinted light theme (selector label: Blue)
+4. **Light Green** - Green-tinted light theme (selector label: Green)
 
 ### Theme Implementation
 - Theme context provider in `apps/web/contexts/theme-context.tsx`
-- Theme toggle component in `apps/web/components/theme-toggle.tsx`
+- Theme toggle component in `apps/web/components/theme-toggle.tsx`, rendered on the patient-queue landing page (`apps/web/app/(dashboard)/layout.tsx`)
+- Theme selector UI: Shadcn/ui **Native Select** (`apps/web/components/ui/native-select.tsx`) titled "Theme Mode" with four options — Dark, White, Blue, Green — mapping to `dark`, `light`, `light-blue`, `light-green`
 - Theme variables defined in `apps/web/app/globals.css`
 - Theme persistence via localStorage and URL parameters
 - Tailwind CSS custom color palette for light-blue and light-green

@@ -8,9 +8,11 @@
   - Infrastructure: বর্তমানে, Docker/Docker Compose + Redis/Memcached
 
 - **Rules**:
-  1. No new frameworks/libraries without explicit human approval
-  2. Follow existing folder structure and naming conventions
-  3.максимumdependency changes require human review
+   1. No new frameworks/libraries without explicit human approval
+   2. Follow existing folder structure and naming conventions
+   3.максимumdependency changes require human review
+   4. Docker containers must be built and run according to `docker-compose.yml` specifications
+   5. All environment variables must be declared in `.env` files and loaded with `python-dotenv` in Python
 
 ## Code Quality
 - Follow ESLint/Prettier configurations in `@repo/eslint-config`
@@ -28,6 +30,33 @@
 - Add inline docs for significant logic
 
 ## Environment Details
-- Current time: 2026-07-06T16:15:43+08:00
+- Current time: 2026-07-07T12:56:00+08:00
 - Working directory: C:\kilocode\clinic11
 - Workspace root folder: C:\kilocode\clinic11
+- OS: Windows 11 (development). Use proper PowerShell syntax in Shell.
+- OS: Windows 11 (development). pwsh is not recognized as the name of a cmdlet, use powershell instead pwsh
+- Tech Stack: documented at project root `TECH_STACK.md`
+
+## MCP Tool Usage (Mandatory for Token Efficiency)
+Before reading files or planning implementation, the agent MUST:
+
+1. **Search project context** via `codebase-memory` MCP tools:
+   - Query existing architecture, decisions, and patterns
+   - Check for similar past features or known issues
+2. **Search codebase** via `cocoindex-code` MCP tools:
+   - Find relevant files, functions, and data models
+   - Understand existing patterns before writing new code
+3. **Only after MCP queries**, proceed with `/speckit.specify` and `/speckit.plan`
+
+Installed MCP servers:
+- `cocoindex-code-mcp-server` — https://github.com/aanno/cocoindex-code-mcp-server
+- `codebase-memory-mcp` — https://github.com/DeusData/codebase-memory-mcp
+
+### Token Budget Rule
+- Do NOT read entire files if MCP tools can return relevant snippets
+- Prefer `codebase-memory` for high-level context
+- Prefer `cocoindex-code` for code-level details
+- Cache and reuse MCP query results across the session
+
+
+

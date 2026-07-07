@@ -14,6 +14,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { ProtectedRoute } from "@/components/protected-route"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function DashboardLayout({
   children,
@@ -42,6 +43,9 @@ export default function DashboardLayout({
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
+          </div>
+          <div className="ml-auto flex items-center gap-2 px-4">
+            <ThemeToggle />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

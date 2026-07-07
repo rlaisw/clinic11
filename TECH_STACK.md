@@ -35,6 +35,7 @@ Hybrid full-stack application using Python/Django for backend and React/Next.js 
 - **4 Theme Modes**: Dark / Light / Light Blue / Light Green
 - **Theme Context Provider**: `apps/web/contexts/theme-context.tsx`
 - **Theme Toggle Component**: `apps/web/components/theme-toggle.tsx`
+- **Theme Selector UI**: Shadcn/ui **Native Select** (`apps/web/components/ui/native-select.tsx`) titled "Theme Mode" with four options — Dark, White, Blue, Green — mapping to `dark`, `light`, `light-blue`, `light-green`
 - **Theme Variables**: Defined in `apps/web/app/globals.css` using CSS custom properties
 - **Theme Persistence**: localStorage + URL parameters
 - **Tailwind Custom Colors**: light-blue (#60a5fa) and light-green (#34d399) added to `backend/tailwind.config.js`
