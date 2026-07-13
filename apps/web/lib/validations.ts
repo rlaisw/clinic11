@@ -132,3 +132,11 @@ export const prescriptionMedicationSchema = z.object({
 });
 
 export type PrescriptionMedicationFormValues = z.infer<typeof prescriptionMedicationSchema>;
+
+export const sickLeaveCertificateSchema = z.object({
+  consultation_details: z.string().min(1, "Consultation details are required"),
+  diagnosis: z.string().min(1, "Diagnosis is required"),
+  recommended_sick_leave: z.string().min(1, "Recommended sick leave is required"),
+});
+
+export type SickLeaveCertificateFormValues = z.infer<typeof sickLeaveCertificateSchema>;

@@ -11,12 +11,19 @@ from .models import Profile
 @permission_classes([IsAuthenticated])
 def get_user(request):
     role = 'nurse'
+    profile = None
     if hasattr(request.user, 'profile'):
-        role = request.user.profile.role
+        profile = request.user.profile
+        role = profile.role
     return Response({
         'id': request.user.id,
         'username': request.user.username,
+        'email': request.user.email,
         'role': role,
+        'clinic_name': profile.clinic_name if profile else '',
+        'clinic_address': profile.clinic_address if profile else '',
+        'phone': profile.phone if profile else '',
+        'display_name': profile.display_name if profile else '',
     })
 
 

@@ -7,6 +7,7 @@ import { PatientBackgroundForm } from "@/components/doctor/patient-background-fo
 import { MedicationHistoryTabs } from "@/components/doctor/medication-history-tabs";
 import { DataVisualizationTab } from "@/components/doctor/data-visualization-tabs";
 import { PrescriptionTabs } from "@/components/doctor/prescription-tabs";
+import { SickLeaveCertificateTabs } from "@/components/doctor/sick-leave-certificate-tabs";
 import { useUser } from "@/contexts/user-context";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +46,9 @@ export default function DoctorPatientLayout({
       ? "data-visualization"
       : pathname.includes("/prescriptions")
         ? "prescriptions"
-        : "profile";
+        : pathname.includes("/sick-leave-certificate")
+          ? "sick-leave-certificate"
+          : "profile";
 
   return (
     <div className="space-y-4">
@@ -102,6 +105,17 @@ export default function DoctorPatientLayout({
           >
             Prescription
           </Link>
+          <Link
+            href={`/doctor/patients/${id}/sick-leave-certificate`}
+            className={cn(
+              "px-3 py-2 text-sm font-medium border-b-2",
+              currentTab === "sick-leave-certificate"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Sick Leave Certificate
+          </Link>
         </nav>
       </div>
 
@@ -133,6 +147,12 @@ export default function DoctorPatientLayout({
       {currentTab === "prescriptions" && (
         <div className="mt-4">
           <PrescriptionTabs patientId={id} disabled={!isDoctor} />
+        </div>
+      )}
+
+      {currentTab === "sick-leave-certificate" && (
+        <div className="mt-4">
+          <SickLeaveCertificateTabs patientId={id} disabled={!isDoctor} />
         </div>
       )}
     </div>

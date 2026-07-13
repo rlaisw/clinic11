@@ -13,6 +13,10 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='nurse')
+    clinic_name = models.CharField(max_length=255, blank=True, default='')
+    clinic_address = models.TextField(blank=True, default='')
+    phone = models.CharField(max_length=20, blank=True, default='')
+    display_name = models.CharField(max_length=255, blank=True, default='')
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Patient, MedicalHistory, EmergencyContact, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication
+from .models import Patient, MedicalHistory, EmergencyContact, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink
 
 
 class MedicalHistorySerializer(serializers.ModelSerializer):
@@ -136,3 +136,33 @@ class PrescriptionMedicationSerializer(serializers.ModelSerializer):
         model = PrescriptionMedication
         fields = ['id', 'patient', 'item', 'medication_name', 'dosage_amount', 'dosage_unit', 'route', 'frequency', 'days_supply', 'diagnostic_result', 'start_date', 'end_date', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+
+class SickLeaveCertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SickLeaveCertificate
+        fields = [
+            'id', 'reference_number', 'patient', 'doctor_name', 'doctor_display_name', 'doctor_email', 'doctor_phone',
+            'clinic_name', 'clinic_address', 'patient_name', 'patient_hkid',
+            'consultation_details', 'diagnosis', 'recommended_sick_leave',
+            'issue_date', 'expiry_date', 'qr_code_token', 'status',
+            'signature_timestamp', 'revoked_timestamp', 'created_at', 'updated_at',
+        ]
+        read_only_fields = [
+            'id', 'issue_date', 'status',
+            'signature_timestamp', 'revoked_timestamp', 'created_at', 'updated_at',
+        ]
+
+
+class SickLeaveCertificateListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SickLeaveCertificate
+        fields = ['id', 'reference_number', 'patient_name', 'patient_hkid', 'issue_date', 'diagnosis', 'status', 'qr_code_token']
+        read_only_fields = fields
+
+
+class ShareLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShareLink
+        fields = ['id', 'certificate', 'token', 'expires_at', 'max_views', 'view_count', 'is_active', 'created_at']
+        read_only_fields = ['id', 'token', 'expires_at', 'view_count', 'is_active', 'created_at']

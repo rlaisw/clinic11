@@ -1,10 +1,14 @@
-from rest_framework import viewsets, filters, status
+from rest_framework import viewsets, filters, status, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.decorators import action
+from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
+from django.http import HttpResponse
 from django.utils import timezone
-from .models import Patient, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication
-from .serializers import PatientSerializer, QueueEntrySerializer, QueueCheckInSerializer, PatientBackgroundSerializer, ActiveMedicationSerializer, PastMedicationSerializer, AllergySerializer, PrescriptionMedicationSerializer
+from django.db.models import Q
+from django.conf import settings
+from .models import Patient, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink
+from .serializers import PatientSerializer, QueueEntrySerializer, QueueCheckInSerializer, PatientBackgroundSerializer, ActiveMedicationSerializer, PastMedicationSerializer, AllergySerializer, PrescriptionMedicationSerializer, SickLeaveCertificateSerializer, SickLeaveCertificateListSerializer, ShareLinkSerializer
+from .utils import generate_qr_code_token, generate_qr_code_image_base64, generate_qr_code_image_from_data, generate_certificate_pdf, compute_expiry_date, verify_qr_code_token
 
 
 class DoctorPermission(IsAuthenticated):
@@ -79,6 +83,50 @@ class PatientViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['get', 'post'], url_path='sick-leave-certificates', permission_classes=[DoctorPermission])
+    def sick_leave_certificates(self, request, pk=None):
+        if request.method == 'GET':
+            search = request.query_params.get('search', '')
+            certs = SickLeaveCertificate.objects.filter(patient_id=pk)
+            if search:
+                certs = certs.filter(
+                    Q(patient_name__icontains=search) |
+                    Q(patient_hkid__icontains=search) |
+                    Q(qr_code_token__icontains=search)
+                )
+            return Response(SickLeaveCertificateListSerializer(certs, many=True).data)
+
+        patient = self.get_object()
+        doctor = request.user
+        profile = doctor.profile
+        patient_full_name = f"{patient.first_name} {patient.last_name}"
+        issue_date = timezone.now().date()
+        qr_token = generate_qr_code_token(str(patient.id), issue_date)
+
+        serializer = SickLeaveCertificateSerializer(data={
+            **request.data,
+            'patient': patient.id,
+            'doctor_name': doctor.get_full_name() or doctor.username,
+            'doctor_display_name': getattr(profile, 'display_name', '') or '',
+            'doctor_email': doctor.email,
+            'doctor_phone': getattr(profile, 'phone', '') or '',
+            'clinic_name': profile.clinic_name or '',
+            'clinic_address': profile.clinic_address or '',
+            'patient_name': patient_full_name,
+            'patient_hkid': patient.hkid,
+            'expiry_date': compute_expiry_date(issue_date),
+            'qr_code_token': qr_token,
+        })
+        serializer.is_valid(raise_exception=True)
+        certificate = serializer.save()
+
+        from django.conf import settings
+        qr_verify_url = f"{settings.FRONTEND_BASE_URL}/verify/{qr_token}"
+        qr_base64 = generate_qr_code_image_from_data(qr_verify_url)
+        response_data = SickLeaveCertificateSerializer(certificate).data
+        response_data['qr_code_base64'] = qr_base64
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 class QueueEntryViewSet(viewsets.ModelViewSet):
@@ -167,3 +215,148 @@ class PrescriptionMedicationViewSet(viewsets.ModelViewSet):
     queryset = PrescriptionMedication.objects.all()
     serializer_class = PrescriptionMedicationSerializer
     permission_classes = [DoctorPermission]
+
+
+class SickLeaveCertificateViewSet(viewsets.ModelViewSet):
+    queryset = SickLeaveCertificate.objects.all()
+    serializer_class = SickLeaveCertificateSerializer
+    permission_classes = [DoctorPermission]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SickLeaveCertificateListSerializer
+        return SickLeaveCertificateSerializer
+
+    def create(self, request, *args, **kwargs):
+        patient_id = request.data.get('patient')
+        if not patient_id:
+            return Response({'error': 'patient is required'}, status=status.HTTP_400_BAD_REQUEST)
+        patient = Patient.objects.get(id=patient_id)
+        doctor = request.user
+        profile = doctor.profile
+        issue_date = timezone.now().date()
+        qr_token = generate_qr_code_token(str(patient.id), issue_date)
+
+        serializer = SickLeaveCertificateSerializer(data={
+            **request.data,
+            'patient': patient.id,
+            'doctor_name': doctor.get_full_name() or doctor.username,
+            'doctor_display_name': getattr(profile, 'display_name', '') or '',
+            'doctor_email': doctor.email,
+            'doctor_phone': getattr(profile, 'phone', '') or '',
+            'clinic_name': profile.clinic_name or '',
+            'clinic_address': profile.clinic_address or '',
+            'patient_name': f"{patient.first_name} {patient.last_name}",
+            'patient_hkid': patient.hkid,
+            'expiry_date': compute_expiry_date(issue_date),
+            'qr_code_token': qr_token,
+        })
+        serializer.is_valid(raise_exception=True)
+        certificate = serializer.save()
+        return Response(SickLeaveCertificateSerializer(certificate).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['patch'])
+    def revoke(self, request, pk=None):
+        certificate = self.get_object()
+        if certificate.status != 'active':
+            return Response({'error': 'Certificate is not active'}, status=status.HTTP_400_BAD_REQUEST)
+        certificate.status = 'revoked'
+        certificate.revoked_timestamp = timezone.now()
+        certificate.save()
+        return Response({'id': str(certificate.id), 'status': 'revoked', 'revoked_timestamp': certificate.revoked_timestamp})
+
+    @action(detail=True, methods=['get'])
+    def pdf(self, request, pk=None):
+        certificate = self.get_object()
+        base_url = settings.FRONTEND_BASE_URL
+        try:
+            pdf_bytes = generate_certificate_pdf(certificate, base_url=base_url)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return Response({'error': str(e)}, status=500)
+        return HttpResponse(pdf_bytes, content_type='application/pdf', headers={
+            'Content-Disposition': f'attachment; filename="sick-leave-certificate-{certificate.id}.pdf"'
+        })
+
+    @action(detail=True, methods=['post'], url_path='share-link')
+    def share_link(self, request, pk=None):
+        certificate = self.get_object()
+        import uuid
+        from datetime import timedelta
+        token = uuid.uuid4().hex
+        max_views = request.data.get('max_views', None)
+        if max_views is not None:
+            max_views = int(max_views)
+        share = ShareLink.objects.create(
+            certificate=certificate,
+            token=token,
+            expires_at=timezone.now() + timedelta(days=31),
+            max_views=max_views,
+        )
+        base_url = request.build_absolute_uri('/api/')
+        share_url = f"{base_url.rstrip('/')}/share/{token}/"
+        return Response({
+            'share_url': share_url,
+            'expires_at': share.expires_at,
+            'max_views': max_views,
+        }, status=status.HTTP_201_CREATED)
+
+
+class VerifyCertificateView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+    throttle_scope = 'verify'
+
+    def get(self, request, qr_code_token):
+        if not verify_qr_code_token(qr_code_token):
+            return Response({'verified': False, 'message': 'Fake — certificate cannot be verified'})
+        try:
+            certificate = SickLeaveCertificate.objects.get(qr_code_token=qr_code_token)
+        except SickLeaveCertificate.DoesNotExist:
+            return Response({'verified': False, 'message': 'Fake — certificate cannot be verified'})
+
+        if certificate.status == 'revoked':
+            return Response({'verified': False, 'message': 'This certificate has been revoked'})
+        if timezone.now().date() > certificate.expiry_date:
+            return Response({'verified': False, 'message': 'This certificate has expired'})
+
+        return Response({
+            'verified': True,
+            'message': 'Verified by the clinic and signed by doctor',
+            'certificate': {
+                'reference_number': certificate.reference_number,
+                'patient_name': certificate.patient_name,
+                'doctor_name': certificate.doctor_name,
+                'doctor_display_name': certificate.doctor_display_name,
+                'clinic_name': certificate.clinic_name,
+                'issue_date': certificate.issue_date,
+                'diagnosis': certificate.diagnosis,
+                'recommended_sick_leave': certificate.recommended_sick_leave,
+            }
+        })
+
+
+class ShareLinkDownloadView(generics.GenericAPIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, token):
+        try:
+            share = ShareLink.objects.get(token=token, is_active=True)
+        except ShareLink.DoesNotExist:
+            return Response({'error': 'Link not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if timezone.now() > share.expires_at:
+            return Response({'error': 'Link expired'}, status=status.HTTP_410_GONE)
+        if share.max_views is not None and share.view_count >= share.max_views:
+            return Response({'error': 'Max views reached'}, status=status.HTTP_410_GONE)
+
+        certificate = share.certificate
+        if certificate.status == 'revoked':
+            return Response({'error': 'Certificate has been revoked'}, status=status.HTTP_410_GONE)
+
+        pdf_bytes = generate_certificate_pdf(certificate)
+        share.view_count += 1
+        share.save()
+        return HttpResponse(pdf_bytes, content_type='application/pdf', headers={
+            'Content-Disposition': f'attachment; filename="sick-leave-certificate-{certificate.id}.pdf"'
+        })

@@ -201,3 +201,70 @@ export interface QueueCheckInInput {
   visit_type: VisitType;
   reason?: string;
 }
+
+// ============================================================
+// Sick Leave Certificate Types
+// ============================================================
+
+export interface SickLeaveCertificate {
+  id: string;
+  reference_number: string;
+  patient: string;
+  doctor_name: string;
+  doctor_email: string;
+  doctor_phone: string;
+  clinic_name: string;
+  clinic_address: string;
+  patient_name: string;
+  patient_hkid: string;
+  consultation_details: string;
+  diagnosis: string;
+  recommended_sick_leave: string;
+  issue_date: string;
+  expiry_date: string;
+  qr_code_token: string;
+  status: "active" | "revoked";
+  signature_timestamp: string;
+  revoked_timestamp?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SickLeaveCertificateCreateResponse extends SickLeaveCertificate {
+  qr_code_base64?: string;
+}
+
+export interface SickLeaveCertificateListItem {
+  id: string;
+  reference_number: string;
+  patient_name: string;
+  patient_hkid: string;
+  issue_date: string;
+  diagnosis: string;
+  status: string;
+  qr_code_token: string;
+}
+
+export interface CreateSickLeaveCertificateInput {
+  consultation_details: string;
+  diagnosis: string;
+  recommended_sick_leave: string;
+}
+
+export interface ShareLinkResponse {
+  share_url: string;
+  expires_at: string;
+  max_views: number | null;
+}
+
+export interface CertificateVerificationResponse {
+  verified: boolean;
+  message: string;
+  certificate?: {
+    patient_name: string;
+    doctor_name: string;
+    clinic_name: string;
+    issue_date: string;
+    diagnosis: string;
+  };
+}

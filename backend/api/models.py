@@ -1,4 +1,9 @@
 from django.db import models
+from django.utils import timezone
+import uuid
+
+from .utils import generate_reference_number
+
 
 class PatientBackground(models.Model):
     patient = models.OneToOneField(
@@ -218,3 +223,77 @@ class QueueEntry(models.Model):
 
     def __str__(self):
         return f"{self.patient} - {self.get_status_display()}"
+
+
+class SickLeaveCertificate(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('revoked', 'Revoked'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    reference_number = models.CharField(max_length=32, unique=True, blank=True, null=True)
+    patient = models.ForeignKey(
+        Patient, on_delete=models.CASCADE, related_name='sick_leave_certificates'
+    )
+    doctor_name = models.CharField(max_length=255, blank=True)
+    doctor_display_name = models.CharField(max_length=255, blank=True, default='')
+    doctor_email = models.EmailField(blank=True)
+    doctor_phone = models.CharField(max_length=20, blank=True)
+    clinic_name = models.CharField(max_length=255, blank=True)
+    clinic_address = models.TextField(blank=True)
+    patient_name = models.CharField(max_length=255, blank=True)
+    patient_hkid = models.CharField(max_length=20, blank=True)
+    consultation_details = models.TextField()
+    diagnosis = models.TextField()
+    recommended_sick_leave = models.CharField(max_length=255)
+    issue_date = models.DateField(auto_now_add=True)
+    expiry_date = models.DateField()
+    qr_code_token = models.CharField(max_length=512, unique=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    signature_timestamp = models.DateTimeField(auto_now_add=True)
+    revoked_timestamp = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-issue_date']
+
+    def save(self, *args, **kwargs):
+        if not self.reference_number:
+            issue_date = self.issue_date or timezone.now().date()
+            self.reference_number = generate_reference_number(issue_date)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"SickLeaveCertificate {self.id} - {self.patient_name}"
+
+
+class CertificateCounter(models.Model):
+    last_sequence = models.BigIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Certificate Counter"
+        verbose_name_plural = "Certificate Counters"
+
+    def __str__(self):
+        return f"CertificateCounter {self.last_sequence}"
+
+
+class ShareLink(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    certificate = models.ForeignKey(
+        SickLeaveCertificate, on_delete=models.CASCADE, related_name='share_links'
+    )
+    token = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+    max_views = models.PositiveIntegerField(null=True, blank=True)
+    view_count = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"ShareLink {self.token} - {self.certificate}"
