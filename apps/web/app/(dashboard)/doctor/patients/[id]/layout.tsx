@@ -8,6 +8,7 @@ import { MedicationHistoryTabs } from "@/components/doctor/medication-history-ta
 import { DataVisualizationTab } from "@/components/doctor/data-visualization-tabs";
 import { PrescriptionTabs } from "@/components/doctor/prescription-tabs";
 import { SickLeaveCertificateTabs } from "@/components/doctor/sick-leave-certificate-tabs";
+import { ReceiptTabs } from "@/components/doctor/receipt-tabs";
 import { useUser } from "@/contexts/user-context";
 import { cn } from "@/lib/utils";
 
@@ -46,9 +47,11 @@ export default function DoctorPatientLayout({
       ? "data-visualization"
       : pathname.includes("/prescriptions")
         ? "prescriptions"
-        : pathname.includes("/sick-leave-certificate")
-          ? "sick-leave-certificate"
-          : "profile";
+        : pathname.includes("/receipt")
+          ? "receipt"
+          : pathname.includes("/sick-leave-certificate")
+            ? "sick-leave-certificate"
+            : "profile";
 
   return (
     <div className="space-y-4">
@@ -94,7 +97,7 @@ export default function DoctorPatientLayout({
           >
             Data Visualization
           </Link>
-          <Link
+<Link
             href={`/doctor/patients/${id}/prescriptions`}
             className={cn(
               "px-3 py-2 text-sm font-medium border-b-2",
@@ -104,6 +107,17 @@ export default function DoctorPatientLayout({
             )}
           >
             Prescription
+          </Link>
+          <Link
+            href={`/doctor/patients/${id}/receipt`}
+            className={cn(
+              "px-3 py-2 text-sm font-medium border-b-2",
+              currentTab === "receipt"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Receipt
           </Link>
           <Link
             href={`/doctor/patients/${id}/sick-leave-certificate`}
@@ -153,6 +167,12 @@ export default function DoctorPatientLayout({
       {currentTab === "sick-leave-certificate" && (
         <div className="mt-4">
           <SickLeaveCertificateTabs patientId={id} disabled={!isDoctor} />
+        </div>
+      )}
+
+      {currentTab === "receipt" && (
+        <div className="mt-4">
+          <ReceiptTabs patientId={id} disabled={!isDoctor} />
         </div>
       )}
     </div>

@@ -89,6 +89,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
 PUBLIC_VERIFY_BASE_URL = os.environ.get('PUBLIC_VERIFY_BASE_URL', 'http://localhost:8000')
 FRONTEND_BASE_URL = os.environ.get('FRONTEND_BASE_URL', 'http://localhost:3001')
+SICK_LEAVE_CERTIFICATE_TEMPLATE_PATH = os.path.join(BASE_DIR.parent, 'template', 'slcv1.pdf')
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True

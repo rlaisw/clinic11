@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import PatientViewSet, QueueEntryViewSet, ActiveMedicationViewSet, PastMedicationViewSet, AllergyViewSet, PrescriptionMedicationViewSet, SickLeaveCertificateViewSet, VerifyCertificateView, ShareLinkDownloadView
+from .views import PatientViewSet, QueueEntryViewSet, ActiveMedicationViewSet, PastMedicationViewSet, AllergyViewSet, PrescriptionMedicationViewSet, SickLeaveCertificateViewSet, VerifyCertificateView, ShareLinkDownloadView, SrefPreviewView, ReceiptPDFView
 
 router = DefaultRouter()
 router.register(r'patients', PatientViewSet)
@@ -18,4 +18,6 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('verify/<str:qr_code_token>/', VerifyCertificateView.as_view(), name='verify-certificate'),
     path('share/<str:token>/', ShareLinkDownloadView.as_view(), name='share-link-download'),
+    path('sref-preview/', SrefPreviewView.as_view(), name='sref-preview'),
+    path('receipt/<str:id>/pdf/', ReceiptPDFView.as_view(), name='receipt-pdf'),
 ]

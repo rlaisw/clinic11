@@ -5,10 +5,12 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils import timezone
 from django.db.models import Q
+from django.db import transaction
 from django.conf import settings
+from datetime import date
 from .models import Patient, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink
 from .serializers import PatientSerializer, QueueEntrySerializer, QueueCheckInSerializer, PatientBackgroundSerializer, ActiveMedicationSerializer, PastMedicationSerializer, AllergySerializer, PrescriptionMedicationSerializer, SickLeaveCertificateSerializer, SickLeaveCertificateListSerializer, ShareLinkSerializer
-from .utils import generate_qr_code_token, generate_qr_code_image_base64, generate_qr_code_image_from_data, generate_certificate_pdf, compute_expiry_date, verify_qr_code_token
+from .utils import generate_qr_code_token, generate_qr_code_image_base64, generate_qr_code_image_from_data, generate_certificate_pdf_from_template, compute_expiry_date, verify_qr_code_token
 
 
 class DoctorPermission(IsAuthenticated):
@@ -16,6 +18,22 @@ class DoctorPermission(IsAuthenticated):
         if not super().has_permission(request, view) or not hasattr(request.user, 'profile'):
             return False
         return request.user.profile.role == 'doctor'
+
+
+class SrefPreviewView(generics.GenericAPIView):
+    permission_classes = [DoctorPermission]
+
+    def get(self, request):
+        from .models import CertificateCounter
+        try:
+            counter = CertificateCounter.objects.get(id=1)
+            next_seq = counter.last_sequence + 1
+        except CertificateCounter.DoesNotExist:
+            next_seq = 1
+        year_code = date.today().year - 2025
+        digits = f"{next_seq:012d}"
+        sref = f"S{year_code:03d}-{digits[0:4]}-{digits[4:8]}-{digits[8:12]}"
+        return Response({'sref': sref})
 
 
 class PatientViewSet(viewsets.ModelViewSet):
@@ -270,7 +288,7 @@ class SickLeaveCertificateViewSet(viewsets.ModelViewSet):
         certificate = self.get_object()
         base_url = settings.FRONTEND_BASE_URL
         try:
-            pdf_bytes = generate_certificate_pdf(certificate, base_url=base_url)
+            pdf_bytes = generate_certificate_pdf_from_template(certificate, base_url=base_url)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -354,7 +372,7 @@ class ShareLinkDownloadView(generics.GenericAPIView):
         if certificate.status == 'revoked':
             return Response({'error': 'Certificate has been revoked'}, status=status.HTTP_410_GONE)
 
-        pdf_bytes = generate_certificate_pdf(certificate)
+        pdf_bytes = generate_certificate_pdf_from_template(certificate, base_url=settings.FRONTEND_BASE_URL)
         share.view_count += 1
         share.save()
         return HttpResponse(pdf_bytes, content_type='application/pdf', headers={

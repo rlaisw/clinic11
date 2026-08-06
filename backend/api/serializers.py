@@ -145,6 +145,7 @@ class SickLeaveCertificateSerializer(serializers.ModelSerializer):
             'id', 'reference_number', 'patient', 'doctor_name', 'doctor_display_name', 'doctor_email', 'doctor_phone',
             'clinic_name', 'clinic_address', 'patient_name', 'patient_hkid',
             'consultation_details', 'diagnosis', 'recommended_sick_leave',
+            'remarks',
             'issue_date', 'expiry_date', 'qr_code_token', 'status',
             'signature_timestamp', 'revoked_timestamp', 'created_at', 'updated_at',
         ]
@@ -157,7 +158,7 @@ class SickLeaveCertificateSerializer(serializers.ModelSerializer):
 class SickLeaveCertificateListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SickLeaveCertificate
-        fields = ['id', 'reference_number', 'patient_name', 'patient_hkid', 'issue_date', 'diagnosis', 'status', 'qr_code_token']
+        fields = ['id', 'reference_number', 'patient_name', 'patient_hkid', 'issue_date', 'diagnosis', 'remarks', 'status', 'qr_code_token']
         read_only_fields = fields
 
 

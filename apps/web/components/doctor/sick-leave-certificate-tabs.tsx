@@ -23,7 +23,8 @@ import {
   useDownloadPdf,
   useRevokeSickLeaveCertificate,
 } from "@/hooks/use-sick-leave-certificate";
-import { PlusIcon, DownloadIcon, ShareIcon, XCircleIcon, Search } from "lucide-react";
+import { PlusIcon, DownloadIcon, ShareIcon, XCircleIcon, Search, EyeIcon } from "lucide-react";
+import SickLeaveCertificatePreviewModal from "@/components/doctor/SickLeaveCertificatePreviewModal";
 
 interface CurrentUserInfo {
   username: string;
@@ -49,6 +50,8 @@ interface SickLeaveCertificateTabsProps {
 
 export function SickLeaveCertificateTabs({ patientId, disabled }: SickLeaveCertificateTabsProps) {
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [srefPreview, setSrefPreview] = useState<string>("");
+  const [previewModalId, setPreviewModalId] = useState<string | null>(null);
   const [shareDialogId, setShareDialogId] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState("");
   const [shareMaxViews, setShareMaxViews] = useState<number>(5);
@@ -61,6 +64,14 @@ export function SickLeaveCertificateTabs({ patientId, disabled }: SickLeaveCerti
   const revokeMutation = useRevokeSickLeaveCertificate(patientId);
   const shareLinkMutation = useCreateShareLink();
   const downloadPdfMutation = useDownloadPdf();
+
+  useEffect(() => {
+    if (showCreateForm && !srefPreview) {
+      apiClient.get("/sref-preview/").then((res) => {
+        setSrefPreview(res.data.sref);
+      }).catch(() => {});
+    }
+  }, [showCreateForm, srefPreview]);
 
   if (patientLoading) {
     return <div className="text-sm text-muted-foreground">Loading patient information...</div>;
@@ -103,6 +114,10 @@ export function SickLeaveCertificateTabs({ patientId, disabled }: SickLeaveCerti
     }
   };
 
+  const handlePreview = (certId: string) => {
+    setPreviewModalId(certId);
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -135,6 +150,7 @@ export function SickLeaveCertificateTabs({ patientId, disabled }: SickLeaveCerti
               doctorEmail={currentUser?.email || ""}
               onCancel={() => setShowCreateForm(false)}
               isPending={createMutation.isPending}
+              srefPreview={srefPreview}
               onSubmit={async (data) => {
                 try {
                   const result = await createMutation.mutateAsync(data);
@@ -185,6 +201,9 @@ export function SickLeaveCertificateTabs({ patientId, disabled }: SickLeaveCerti
                     </p>
                   </div>
                   <div className="space-x-1">
+                    <Button size="sm" variant="ghost" onClick={() => handlePreview(cert.id)}>
+                      <EyeIcon className="h-4 w-4" />
+                    </Button>
                     <Button size="sm" variant="ghost" onClick={() => handleDownloadPdf(cert.id)}>
                       <DownloadIcon className="h-4 w-4" />
                     </Button>
@@ -208,39 +227,46 @@ export function SickLeaveCertificateTabs({ patientId, disabled }: SickLeaveCerti
         </CardContent>
       </Card>
 
-      {shareDialogId && (
-        <Dialog open={!!shareDialogId} onOpenChange={() => setShareDialogId(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Share Certificate</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Share Link</Label>
-                <Input value={shareUrl} readOnly className="bg-muted" />
-              </div>
-              <div>
-                <Label>Max Views</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={shareMaxViews}
-                  onChange={(e) => setShareMaxViews(Number(e.target.value))}
-                />
-              </div>
-              <Button
-                className="w-full"
-                onClick={() => navigator.clipboard.writeText(shareUrl)}
-              >
-                Copy Link to Clipboard
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+{shareDialogId && (
+         <Dialog open={!!shareDialogId} onOpenChange={() => setShareDialogId(null)}>
+           <DialogContent>
+             <DialogHeader>
+               <DialogTitle>Share Certificate</DialogTitle>
+             </DialogHeader>
+             <div className="space-y-4">
+               <div>
+                 <Label>Share Link</Label>
+                 <Input value={shareUrl} readOnly className="bg-muted" />
+               </div>
+               <div>
+                 <Label>Max Views</Label>
+                 <Input
+                   type="number"
+                   min={1}
+                   value={shareMaxViews}
+                   onChange={(e) => setShareMaxViews(Number(e.target.value))}
+                 />
+               </div>
+               <Button
+                 className="w-full"
+                 onClick={() => navigator.clipboard.writeText(shareUrl)}
+               >
+                 Copy Link to Clipboard
+               </Button>
+             </div>
+           </DialogContent>
+</Dialog>
       )}
-    </div>
-  );
-}
+
+        {previewModalId && (
+          <SickLeaveCertificatePreviewModal
+            certificateId={previewModalId}
+            onClose={() => setPreviewModalId(null)}
+          />
+        )}
+      </div>
+     );
+   }
 
 interface SickLeaveCertificateFormProps {
   patientName: string;
@@ -249,7 +275,8 @@ interface SickLeaveCertificateFormProps {
   doctorEmail: string;
   onCancel: () => void;
   isPending: boolean;
-  onSubmit: (data: { consultation_details: string; diagnosis: string; recommended_sick_leave: string }) => void;
+  onSubmit: (data: { consultation_details: string; diagnosis: string; recommended_sick_leave: string; remarks?: string }) => void;
+  srefPreview?: string;
 }
 
 function SickLeaveCertificateForm({
@@ -260,11 +287,13 @@ function SickLeaveCertificateForm({
   onCancel,
   isPending,
   onSubmit,
+  srefPreview,
 }: SickLeaveCertificateFormProps) {
   const { register, handleSubmit, formState: { errors } } = useForm<{
     consultation_details: string;
     diagnosis: string;
     recommended_sick_leave: string;
+    remarks?: string;
   }>();
 
   const today = new Date().toISOString().split("T")[0];
@@ -272,6 +301,11 @@ function SickLeaveCertificateForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 border rounded-lg p-4 mb-4">
       <h3 className="font-semibold">Sick Leave Certificate</h3>
+
+      <div>
+        <Label>Sick Leave Certificate Ref. Number</Label>
+        <Input value={srefPreview || 'Loading...'} readOnly disabled className="bg-muted font-mono" />
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -332,6 +366,15 @@ function SickLeaveCertificateForm({
         {errors.recommended_sick_leave && (
           <p className="text-xs text-red-500 mt-1">{errors.recommended_sick_leave.message}</p>
         )}
+      </div>
+
+      <div>
+        <Label htmlFor="remarks">Remarks</Label>
+        <Textarea
+          id="remarks"
+          {...register("remarks")}
+          rows={3}
+        />
       </div>
 
       <div className="flex gap-2 justify-end">

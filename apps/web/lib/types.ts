@@ -220,6 +220,7 @@ export interface SickLeaveCertificate {
   consultation_details: string;
   diagnosis: string;
   recommended_sick_leave: string;
+  remarks: string;
   issue_date: string;
   expiry_date: string;
   qr_code_token: string;
@@ -241,6 +242,7 @@ export interface SickLeaveCertificateListItem {
   patient_hkid: string;
   issue_date: string;
   diagnosis: string;
+  remarks: string;
   status: string;
   qr_code_token: string;
 }
@@ -249,6 +251,7 @@ export interface CreateSickLeaveCertificateInput {
   consultation_details: string;
   diagnosis: string;
   recommended_sick_leave: string;
+  remarks?: string;
 }
 
 export interface ShareLinkResponse {

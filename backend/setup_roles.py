@@ -10,17 +10,17 @@ from accounts.models import Profile
 
 # Create users with roles if they don't exist
 users_data = [
-    ('doctor', 'doctor123', 'doctor', 'Dr. Raymond Lai'),
-    ('nurse01', 'nurse123', 'nurse', ''),
-    ('nurse02', 'nurse123', 'nurse', ''),
-    ('admin', 'admin123', 'admin', ''),
+    ('doctor', 'doctor1997', 'doctor', 'Dr. Raymond Lai'),
+    ('nurse01', 'nurse-3b1e9d', 'nurse', ''),
+    ('nurse02', 'nurse-3b1e9d', 'nurse', ''),
+    ('admin', 'admin-5d0f6e', 'admin', ''),
 ]
 
 for username, password, role, display_name in users_data:
     user, created = User.objects.get_or_create(username=username)
+    user.set_password(password)
+    user.save()
     if created:
-        user.set_password(password)
-        user.save()
         profile, _ = Profile.objects.get_or_create(
             user=user, defaults={'role': role, 'display_name': display_name}
         )
@@ -31,6 +31,7 @@ for username, password, role, display_name in users_data:
         print(f'Created user: {username} with role: {role}')
     else:
         if hasattr(user, 'profile'):
+            print(f'Updated password for: {username}')
             if user.profile.role != role or user.profile.display_name != display_name:
                 user.profile.role = role
                 user.profile.display_name = display_name
