@@ -110,8 +110,8 @@ class PatientViewSet(viewsets.ModelViewSet):
             if search:
                 certs = certs.filter(
                     Q(patient_name__icontains=search) |
-                    Q(patient_hkid__icontains=search) |
-                    Q(qr_code_token__icontains=search)
+                    Q(diagnosis__icontains=search) |
+                    Q(reference_number__icontains=search)
                 )
             return Response(SickLeaveCertificateListSerializer(certs, many=True).data)
 
@@ -239,6 +239,22 @@ class SickLeaveCertificateViewSet(viewsets.ModelViewSet):
     queryset = SickLeaveCertificate.objects.all()
     serializer_class = SickLeaveCertificateSerializer
     permission_classes = [DoctorPermission]
+
+    def get_queryset(self):
+        qs = SickLeaveCertificate.objects.all()
+        patient_id = self.request.query_params.get("patient")
+        if patient_id:
+            qs = qs.filter(patient_id=patient_id)
+        search = self.request.query_params.get("search")
+        if search:
+            qs = qs.filter(
+                Q(patient_name__icontains=search) |
+                Q(patient_hkid__icontains=search) |
+                Q(diagnosis__icontains=search) |
+                Q(reference_number__icontains=search) |
+                Q(qr_code_token__icontains=search)
+            )
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'list':

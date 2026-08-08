@@ -333,7 +333,7 @@ class Receipt(models.Model):
     patient_name = models.CharField(max_length=255, blank=True)
     patient_hkid = models.CharField(max_length=20, blank=True)
     date = models.DateField(auto_now_add=True)
-    consultation = models.TextField()
+    consultation = models.TextField(blank=True, default='')
     medications = models.TextField(blank=True, default='')
     investigations = models.TextField(blank=True, default='')
     procedures = models.TextField(blank=True, default='')

@@ -110,17 +110,15 @@ export function ReceiptTabs({ patientId, disabled }: { patientId: string; disabl
                     investigations: data.investigations,
                     procedures: data.procedures,
                     misc: data.misc,
-                    consultation_free: data.consultation_free,
-                    medications_free: data.medications_free,
-                    investigations_free: data.investigations_free,
-                    procedures_free: data.procedures_free,
-                    misc_free: data.misc_free,
                     total_free: data.total_free,
                     diagnosis: data.diagnosis,
                   });
                   setShowCreateForm(false);
                 } catch (err: any) {
-                  console.error("Failed to create receipt", err?.response?.data || err);
+                  console.error("Failed to create receipt", err?.response?.data || err?.message || err);
+                  console.error("Error status:", err?.response?.status);
+                  console.error("Error headers:", err?.response?.headers);
+                  console.error("Full error:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
                 }
               }}
             />
@@ -261,11 +259,6 @@ interface ReceiptFormProps {
     investigations?: string;
     procedures?: string;
     misc?: string;
-    consultation_free: number;
-    medications_free: number;
-    investigations_free: number;
-    procedures_free: number;
-    misc_free: number;
     total_free: number;
     diagnosis: string;
   }) => void;
@@ -283,11 +276,6 @@ function ReceiptForm({ patientName, patientHkid, onCancel, isPending, onSubmit }
     investigations_cost: number;
     procedures_cost: number;
     misc_cost: number;
-    consultation_free: number;
-    medications_free: number;
-    investigations_free: number;
-    procedures_free: number;
-    misc_free: number;
     diagnosis: string;
   }>();
 
@@ -297,14 +285,8 @@ function ReceiptForm({ patientName, patientHkid, onCancel, isPending, onSubmit }
   const investigations_cost = v(watch("investigations_cost"));
   const procedures_cost = v(watch("procedures_cost"));
   const misc_cost = v(watch("misc_cost"));
-  const consultation_free = v(watch("consultation_free"));
-  const medications_free = v(watch("medications_free"));
-  const investigations_free = v(watch("investigations_free"));
-  const procedures_free = v(watch("procedures_free"));
-  const misc_free = v(watch("misc_free"));
 
-  const total = (consultation_cost + medications_cost + investigations_cost + procedures_cost + misc_cost)
-    - (consultation_free + medications_free + investigations_free + procedures_free + misc_free);
+  const total = consultation_cost + medications_cost + investigations_cost + procedures_cost + misc_cost;
   const totalDisplay = Number.isNaN(total) ? "0.00" : total.toFixed(2);
 
   const handleFormSubmit = handleSubmit((data) => {
@@ -314,11 +296,6 @@ function ReceiptForm({ patientName, patientHkid, onCancel, isPending, onSubmit }
       investigations: data.investigations,
       procedures: data.procedures,
       misc: data.misc,
-      consultation_free,
-      medications_free,
-      investigations_free,
-      procedures_free,
-      misc_free,
       total_free: Math.max(0, total),
       diagnosis: data.diagnosis,
     });
@@ -342,34 +319,28 @@ function ReceiptForm({ patientName, patientHkid, onCancel, isPending, onSubmit }
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Consultation</Label>
-          <Textarea {...register("consultation", { required: "Required" })} rows={2} placeholder="Description" />
+          <Textarea {...register("consultation")} rows={2} placeholder="Description" />
           <Input type="number" step="0.01" min="0" placeholder="Amount ($)" {...register("consultation_cost", { valueAsNumber: true })} />
-          <Input type="number" step="0.01" min="0" placeholder="Free Amount ($)" {...register("consultation_free", { valueAsNumber: true })} />
-          {errors.consultation && <p className="text-xs text-red-500">{errors.consultation.message}</p>}
         </div>
         <div className="space-y-2">
           <Label>Medications</Label>
           <Textarea {...register("medications")} rows={2} placeholder="Description" />
           <Input type="number" step="0.01" min="0" placeholder="Amount ($)" {...register("medications_cost", { valueAsNumber: true })} />
-          <Input type="number" step="0.01" min="0" placeholder="Free Amount ($)" {...register("medications_free", { valueAsNumber: true })} />
         </div>
         <div className="space-y-2">
           <Label>Investigations</Label>
           <Textarea {...register("investigations")} rows={2} placeholder="Description" />
           <Input type="number" step="0.01" min="0" placeholder="Amount ($)" {...register("investigations_cost", { valueAsNumber: true })} />
-          <Input type="number" step="0.01" min="0" placeholder="Free Amount ($)" {...register("investigations_free", { valueAsNumber: true })} />
         </div>
         <div className="space-y-2">
           <Label>Procedures</Label>
           <Textarea {...register("procedures")} rows={2} placeholder="Description" />
           <Input type="number" step="0.01" min="0" placeholder="Amount ($)" {...register("procedures_cost", { valueAsNumber: true })} />
-          <Input type="number" step="0.01" min="0" placeholder="Free Amount ($)" {...register("procedures_free", { valueAsNumber: true })} />
         </div>
         <div className="space-y-2">
           <Label>Misc</Label>
           <Textarea {...register("misc")} rows={2} placeholder="Description" />
           <Input type="number" step="0.01" min="0" placeholder="Amount ($)" {...register("misc_cost", { valueAsNumber: true })} />
-          <Input type="number" step="0.01" min="0" placeholder="Free Amount ($)" {...register("misc_free", { valueAsNumber: true })} />
         </div>
       </div>
 

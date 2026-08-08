@@ -11,7 +11,8 @@ apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("accessToken") || localStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = `Token ${token}`;
+      const isJwt = token.split(".").length === 3;
+      config.headers.Authorization = isJwt ? `Bearer ${token}` : `Token ${token}`;
     }
   }
   return config;

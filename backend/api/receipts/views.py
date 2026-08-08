@@ -24,6 +24,13 @@ class ReceiptViewSet(viewsets.ModelViewSet):
         patient_id = self.request.query_params.get("patient")
         if patient_id:
             qs = qs.filter(patient_id=patient_id)
+        search = self.request.query_params.get("search")
+        if search:
+            qs = qs.filter(
+                Q(patient_name__icontains=search) |
+                Q(diagnosis__icontains=search) |
+                Q(rref__icontains=search)
+            )
         return qs
 
     def get_serializer_class(self):
