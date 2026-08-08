@@ -51,7 +51,9 @@ export default function DoctorPatientLayout({
           ? "sick-leave-certificate"
           : pathname.includes("/receipt")
             ? "receipt"
-            : "profile";
+            : pathname.includes("/ai-chatbot")
+              ? "ai-chatbot"
+              : "profile";
 
   return (
     <div className="space-y-4">
@@ -130,6 +132,17 @@ export default function DoctorPatientLayout({
           >
             Sick Leave Certificate
           </Link>
+          <Link
+            href={`/doctor/patients/${id}/ai-chatbot`}
+            className={cn(
+              "px-3 py-2 text-sm font-medium border-b-2",
+              currentTab === "ai-chatbot"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            AI Chatbot
+          </Link>
         </nav>
       </div>
 
@@ -173,6 +186,16 @@ export default function DoctorPatientLayout({
       {currentTab === "sick-leave-certificate" && (
         <div className="mt-4">
           <SickLeaveCertificateTabs patientId={id} disabled={!isDoctor} />
+        </div>
+      )}
+
+      {currentTab === "ai-chatbot" && (
+        <div className="mt-4">
+          <iframe
+            src="http://172.27.59.80/app/3c80b0a5-96d7-4012-bc6b-ef7a69536adc/workflow"
+            className="w-full h-[80vh] border rounded"
+            title="AI Chatbot"
+          />
         </div>
       )}
     </div>
