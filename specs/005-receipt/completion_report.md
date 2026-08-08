@@ -62,6 +62,8 @@ All 30 tasks (T001-T030) implemented and marked `[X]` in `tasks.md`.
 - ✅ Preview modal (full-screen iframe)
 - ✅ Download PDF
 - ✅ Share link with clipboard copy
-- ✅ Search by patient_name, diagnosis, rref/reference_number
+- ✅ Search by patient_name, diagnosis, rref/reference_number (visible fields only)
 - ✅ Free Amount fields removed from form
 - ✅ Consultation field made optional
+- ✅ Auth header fix: apiClient detects JWT vs DRF token, uses correct Bearer/Token prefix
+- ✅ doctor user set to superuser (same full access as admin)
