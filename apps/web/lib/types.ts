@@ -271,3 +271,86 @@ export interface CertificateVerificationResponse {
     diagnosis: string;
   };
 }
+
+// ============================================================
+// Receipt Types
+// ============================================================
+
+export interface Receipt {
+  id: string;
+  rref: string;
+  patient: string;
+  doctor_name: string;
+  doctor_display_name: string;
+  doctor_email: string;
+  doctor_phone: string;
+  clinic_name: string;
+  clinic_address: string;
+  patient_name: string;
+  patient_hkid: string;
+  date: string;
+  consultation: string;
+  medications: string;
+  investigations: string;
+  procedures: string;
+  misc: string;
+  consultation_free: string;
+  medications_free: string;
+  investigations_free: string;
+  procedures_free: string;
+  misc_free: string;
+  total_free: string;
+  total_dollars: string;
+  diagnosis: string;
+  qr_code_token: string;
+  status: "active" | "revoked";
+  signature_timestamp: string;
+  revoked_timestamp?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ReceiptCreateResponse extends Receipt {
+  qr_code_base64?: string;
+}
+
+export interface ReceiptListItem {
+  id: string;
+  rref: string;
+  patient_name: string;
+  patient_hkid: string;
+  date: string;
+  diagnosis: string;
+  total_free: string;
+  status: string;
+  qr_code_token: string;
+}
+
+export interface CreateReceiptInput {
+  consultation: string;
+  medications?: string;
+  investigations?: string;
+  procedures?: string;
+  misc?: string;
+  consultation_free?: number;
+  medications_free?: number;
+  investigations_free?: number;
+  procedures_free?: number;
+  misc_free?: number;
+  total_free: number;
+  diagnosis: string;
+}
+
+export interface ReceiptVerificationResponse {
+  verified: boolean;
+  message: string;
+  receipt?: {
+    rref: string;
+    patient_name: string;
+    doctor_name: string;
+    clinic_name: string;
+    date: string;
+    total_free: string;
+    diagnosis: string;
+  };
+}

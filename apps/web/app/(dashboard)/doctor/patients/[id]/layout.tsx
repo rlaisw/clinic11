@@ -47,10 +47,10 @@ export default function DoctorPatientLayout({
       ? "data-visualization"
       : pathname.includes("/prescriptions")
         ? "prescriptions"
-        : pathname.includes("/receipt")
-          ? "receipt"
-          : pathname.includes("/sick-leave-certificate")
-            ? "sick-leave-certificate"
+        : pathname.includes("/sick-leave-certificate")
+          ? "sick-leave-certificate"
+          : pathname.includes("/receipt")
+            ? "receipt"
             : "profile";
 
   return (
@@ -97,7 +97,7 @@ export default function DoctorPatientLayout({
           >
             Data Visualization
           </Link>
-<Link
+          <Link
             href={`/doctor/patients/${id}/prescriptions`}
             className={cn(
               "px-3 py-2 text-sm font-medium border-b-2",
@@ -164,15 +164,15 @@ export default function DoctorPatientLayout({
         </div>
       )}
 
-      {currentTab === "sick-leave-certificate" && (
-        <div className="mt-4">
-          <SickLeaveCertificateTabs patientId={id} disabled={!isDoctor} />
-        </div>
-      )}
-
       {currentTab === "receipt" && (
         <div className="mt-4">
           <ReceiptTabs patientId={id} disabled={!isDoctor} />
+        </div>
+      )}
+
+      {currentTab === "sick-leave-certificate" && (
+        <div className="mt-4">
+          <SickLeaveCertificateTabs patientId={id} disabled={!isDoctor} />
         </div>
       )}
     </div>

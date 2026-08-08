@@ -2,7 +2,7 @@ from django.db import models, transaction
 from django.utils import timezone
 import uuid
 
-from .utils import generate_reference_number
+from .utils import generate_reference_number, generate_receipt_number
 
 
 class PatientBackground(models.Model):
@@ -247,6 +247,7 @@ class SickLeaveCertificate(models.Model):
     consultation_details = models.TextField()
     diagnosis = models.TextField()
     recommended_sick_leave = models.CharField(max_length=255)
+    remarks = models.TextField(blank=True, default='')
     issue_date = models.DateField(auto_now_add=True)
     expiry_date = models.DateField()
     qr_code_token = models.CharField(max_length=512, unique=True)
@@ -297,3 +298,68 @@ class ShareLink(models.Model):
 
     def __str__(self):
         return f"ShareLink {self.token} - {self.certificate}"
+
+
+class ReceiptCounter(models.Model):
+    id = models.AutoField(primary_key=True)
+    last_sequence = models.BigIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Receipt Counter"
+        verbose_name_plural = "Receipt Counters"
+
+    def __str__(self):
+        return f"ReceiptCounter {self.last_sequence}"
+
+
+class Receipt(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('revoked', 'Revoked'),
+        ('expired', 'Expired'),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    rref = models.CharField(max_length=32, unique=True, blank=True, null=True)
+    patient = models.ForeignKey(
+        'Patient', on_delete=models.CASCADE, related_name='receipts'
+    )
+    doctor_name = models.CharField(max_length=255, blank=True)
+    doctor_display_name = models.CharField(max_length=255, blank=True, default='')
+    doctor_email = models.EmailField(blank=True)
+    doctor_phone = models.CharField(max_length=20, blank=True)
+    clinic_name = models.CharField(max_length=255, blank=True)
+    clinic_address = models.TextField(blank=True)
+    patient_name = models.CharField(max_length=255, blank=True)
+    patient_hkid = models.CharField(max_length=20, blank=True)
+    date = models.DateField(auto_now_add=True)
+    consultation = models.TextField()
+    medications = models.TextField(blank=True, default='')
+    investigations = models.TextField(blank=True, default='')
+    procedures = models.TextField(blank=True, default='')
+    misc = models.TextField(blank=True, default='')
+    consultation_free = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    medications_free = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    investigations_free = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    procedures_free = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    misc_free = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_free = models.DecimalField(max_digits=10, decimal_places=2)
+    total_dollars = models.TextField()
+    diagnosis = models.TextField()
+    qr_code_token = models.CharField(max_length=512, unique=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
+    signature_timestamp = models.DateTimeField(auto_now_add=True)
+    revoked_timestamp = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-date']
+
+    def save(self, *args, **kwargs):
+        if not self.rref:
+            self.rref = generate_receipt_number(self.date)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Receipt {self.id} - {self.patient_name}"
