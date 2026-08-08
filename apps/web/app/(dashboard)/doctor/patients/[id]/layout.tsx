@@ -190,12 +190,8 @@ export default function DoctorPatientLayout({
       )}
 
       {currentTab === "ai-chatbot" && (
-        <div className="mt-4">
-          <iframe
-            src="http://172.27.59.80/app/3c80b0a5-96d7-4012-bc6b-ef7a69536adc/workflow"
-            className="w-full h-[80vh] border rounded"
-            title="AI Chatbot"
-          />
+        <div className="mt-4 text-center py-12">
+          <p className="text-muted-foreground mb-4">Opening AI Chatbot in a new tab...</p>
         </div>
       )}
     </div>
