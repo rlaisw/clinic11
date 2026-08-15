@@ -1,0 +1,125 @@
+{
+  "version": "0.7.0",
+  "app": {
+    "name": "Clinic RAG Chat",
+    "description": "Answer clinic questions using semantic RAG search over patient records, sick leave certificates, and receipts",
+    "icon": "\uD83E\uDD16",
+    "icon_background": "#FFEAD5",
+    "mode": "workflow",
+    "features": {
+      "opening_statement": "",
+      "suggested_questions": [
+        "Show me patients with headache",
+        "What medications are prescribed?",
+        "List recent sick leave certificates",
+        "Find receipts with diagnosis of fever"
+      ],
+      "suggested_questions_after_answer": {
+        "enabled": true
+      }
+    }
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "title": "Start",
+      "position": { "x": 100, "y": 100 },
+      "config": {
+        "variables": [
+          {
+            "variable": "query",
+            "label": "Your Question",
+            "type": "text-input",
+            "required": true,
+            "max_length": 500
+          }
+        ]
+      }
+    },
+    {
+      "id": "http_request",
+      "type": "http-request",
+      "title": "Clinic RAG Search",
+      "position": { "x": 100, "y": 300 },
+      "config": {
+        "method": "post",
+        "url": "http://172.28.51.11:8001/query",
+        "authorization": { "type": "no-auth" },
+        "headers": { "Content-Type": "application/json" },
+        "body": {
+          "type": "raw",
+          "content": "{\"query\": \"{{#start.query#}}\", \"top_k\": 5}"
+        }
+      }
+    },
+    {
+      "id": "llm",
+      "type": "llm",
+      "title": "Generate Answer",
+      "position": { "x": 100, "y": 500 },
+      "config": {
+        "model": {
+          "provider": "openai",
+          "name": "gpt-4o",
+          "mode": "chat",
+          "completion_params": {
+            "temperature": 0.3,
+            "max_tokens": 1024
+          }
+        },
+        "prompt_template": [
+          {
+            "role": "system",
+            "text": "You are a medical clinic assistant. Answer the doctor's question using ONLY the clinic records provided.\n\nContext:\n{{#http_request.body#}}\n\nQuestion: {{#start.query#}}\n\nIf no relevant records, say so."
+          },
+          {
+            "role": "user",
+            "text": "{{#start.query#}}"
+          }
+        ],
+        "memory": { "enabled": false }
+      }
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "title": "End",
+      "position": { "x": 100, "y": 700 },
+      "config": {
+        "outputs": [
+          {
+            "variable": "answer",
+            "value": {
+              "type": "variable",
+              "variable_selector": ["llm", "text"]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-start-http",
+      "source": "start",
+      "target": "http_request",
+      "sourceHandle": "start",
+      "targetHandle": "http_request"
+    },
+    {
+      "id": "edge-http-llm",
+      "source": "http_request",
+      "target": "llm",
+      "sourceHandle": "http_request",
+      "targetHandle": "llm"
+    },
+    {
+      "id": "edge-llm-end",
+      "source": "llm",
+      "target": "end",
+      "sourceHandle": "llm",
+      "targetHandle": "end"
+    }
+  ]
+}
