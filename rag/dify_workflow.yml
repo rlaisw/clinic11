@@ -72,7 +72,7 @@ workflow:
         sourceType: start
         targetType: http-request
       id: start-to-http
-      source: start
+      source: '1776072202913'
       sourceHandle: source
       target: http_node
       targetHandle: target
@@ -114,7 +114,7 @@ workflow:
         type: start
         variables: []
       height: 100
-      id: start
+      id: '1776072202913'
       position:
         x: 30
         y: 303
