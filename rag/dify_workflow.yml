@@ -1,192 +1,253 @@
 app:
-  description: Answer clinic questions using semantic RAG search over patient records, sick leave certificates, and receipts
+  description: Answer clinic questions using semantic RAG search over patient records
   icon: ''
   icon_background: '#FFEAD5'
-  mode: workflow
+  icon_type: emoji
+  mode: advanced-chat
   name: Clinic RAG Chat
   use_icon_as_answer_icon: false
 dependencies: []
 kind: app
-version: 0.3.1
+version: 0.7.0
 workflow:
   conversation_variables: []
   environment_variables: []
   features:
     file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
       enabled: false
+      fileUploadConfig:
+        attachment_image_file_size_limit: 2
+        audio_file_size_limit: 50
+        batch_count_limit: 5
+        file_size_limit: 15
+        file_upload_limit: 50
+        image_file_batch_limit: 10
+        image_file_size_limit: 10
+        single_chunk_attachment_limit: 10
+        video_file_size_limit: 100
+        workflow_file_upload_limit: 10
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+      number_limits: 3
     opening_statement: ''
     retriever_resource:
-      enabled: false
+      enabled: true
     sensitive_word_avoidance:
       enabled: false
     speech_to_text:
       enabled: false
     suggested_questions:
-      - Show me patients with headache
-      - What medications are prescribed?
-      - List recent sick leave certificates
+    - Show me patients with headache
+    - What medications are prescribed?
+    - List recent sick leave certificates
+    - Find receipts with diagnosis of fever
     suggested_questions_after_answer:
       enabled: true
     text_to_speech:
       enabled: false
+      language: ''
+      voice: ''
   graph:
     edges:
-      - data:
-          isInIteration: false
-          isInLoop: false
-          sourceType: start
-          targetType: http-request
-        id: start-to-http
-        source: start_node
-        sourceHandle: source
-        target: http_node
-        targetHandle: target
-        type: custom
-        zIndex: 0
-      - data:
-          isInIteration: false
-          isInLoop: false
-          sourceType: http-request
-          targetType: llm
-        id: http-to-llm
-        source: http_node
-        sourceHandle: source
-        target: llm_node
-        targetHandle: target
-        type: custom
-        zIndex: 0
-      - data:
-          isInIteration: false
-          isInLoop: false
-          sourceType: llm
-          targetType: end
-        id: llm-to-end
-        source: llm_node
-        sourceHandle: source
-        target: end_node
-        targetHandle: target
-        type: custom
-        zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: start
+        targetType: http-request
+      id: start-to-http
+      source: start
+      sourceHandle: source
+      target: http_node
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: http-request
+        targetType: llm
+      id: http-to-llm
+      source: http_node
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        isInLoop: false
+        iteration_id: null
+        loop_id: null
+        sourceType: llm
+        targetType: answer
+      id: llm-to-answer
+      source: llm
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+      zIndex: 0
     nodes:
-      - data:
-          desc: ''
-          selected: false
-          title: Start
-          type: start
-          variables:
-            - label: Your Question
-              max_length: 500
-              options: []
-              required: true
-              type: text-input
-              variable: query
-        height: 90
-        id: start_node
-        position:
-          x: 30
-          y: 200
-        positionAbsolute:
-          x: 30
-          y: 200
+    - data:
+        desc: Capture user's chat messages and files.
         selected: false
-        sourcePosition: right
-        targetPosition: left
-        type: custom
-        width: 244
-      - data:
-          desc: Calls the Clinic RAG API to search for relevant records
-          title: Clinic RAG Search
-          type: http-request
-          method: post
-          url: http://172.28.51.11:8001/query
-          authorization:
-            type: no-auth
-          headers: 'Content-Type: application/json'
-          params: ''
-          body:
-            type: raw
-            data: '{"query": "{{#start_node.query#}}", "top_k": 5}'
-          timeout:
-            connect: 10
-            read: 30
-            write: 30
-          retry_config:
+        title: User Input
+        type: start
+        variables: []
+      height: 100
+      id: start
+      position:
+        x: 30
+        y: 303
+      positionAbsolute:
+        x: 30
+        y: 303
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        desc: Search clinic data via RAG API
+        title: Clinic RAG Search
+        type: http-request
+        method: post
+        url: http://172.28.51.11:8001/query
+        authorization:
+          type: no-auth
+        headers: 'Content-Type: application/json'
+        params: ''
+        body:
+          type: raw
+          data: '{"query": "{{#sys.query#}}", "top_k": 5}'
+        timeout:
+          connect: 10
+          read: 30
+          write: 30
+        retry_config:
+          enabled: false
+          max_retries: 1
+          retry_interval: 1000
+          exponential_backoff:
             enabled: false
-            max_retries: 1
-            retry_interval: 1000
-            exponential_backoff:
-              enabled: false
-              multiplier: 2
-              max_interval: 10000
-        height: 90
-        id: http_node
-        position:
-          x: 334
-          y: 200
-        positionAbsolute:
-          x: 334
-          y: 200
-        selected: false
-        sourcePosition: right
-        targetPosition: left
-        type: custom
-        width: 244
-      - data:
-          desc: Generates answer based on RAG results
-          title: Generate Answer
-          type: llm
-          model:
-            provider: openai
-            name: gpt-4o
-            mode: chat
-            completion_params:
-              temperature: 0.3
-              max_tokens: 1024
-          prompt_template:
-            - role: system
-              text: "You are a medical clinic assistant. Answer the doctor's question using ONLY the clinic records provided.\n\nContext:\n{{#http_node.body#}}\n\nQuestion: {{#start_node.query#}}\n\nIf no relevant records, say so."
-            - role: user
-              text: '{{#start_node.query#}}'
-          memory:
+            multiplier: 2
+            max_interval: 10000
+      height: 100
+      id: http_node
+      position:
+        x: 350
+        y: 303
+      positionAbsolute:
+        x: 350
+        y: 303
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - http_node
+          - body
+        desc: Generate answer based on RAG search results
+        memory:
+          query_prompt_template: '{{#sys.query#}}'
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
             enabled: false
-        height: 90
-        id: llm_node
-        position:
-          x: 638
-          y: 200
-        positionAbsolute:
-          x: 638
-          y: 200
+            size: 10
+        model:
+          completion_params:
+            temperature: 0.3
+            max_tokens: 1024
+          mode: chat
+          name: gpt-4o
+          provider: openai
+        prompt_template:
+        - id: system-prompt-rag
+          role: system
+          text: |-
+            You are a medical clinic assistant. Answer the doctor's question using ONLY the clinic records provided below.
+
+            Rules:
+            - Answer concisely based only on the provided context.
+            - If the context contains relevant records, summarize them clearly.
+            - If the context doesn't contain relevant information, say "No relevant clinic records found for this question."
+            - Do NOT make up information or use external knowledge.
+            - Cite the source type (patient, sick_leave_certificate, receipt, etc.) for each piece of information.
+
+            Context from clinic database:
+            {{#http_node.body#}}
+
+            Question: {{#sys.query#}}
         selected: false
-        sourcePosition: right
-        targetPosition: left
-        type: custom
-        width: 244
-      - data:
-          desc: ''
-          outputs:
-            - value_selector:
-                - llm_node
-                - text
-              value_type: string
-              variable: answer
-          selected: false
-          title: End
-          type: end
-        height: 90
-        id: end_node
-        position:
-          x: 942
-          y: 200
-        positionAbsolute:
-          x: 942
-          y: 200
+        title: LLM
+        type: llm
+        vision:
+          enabled: false
+      height: 148
+      id: llm
+      position:
+        x: 670
+        y: 303
+      positionAbsolute:
+        x: 670
+        y: 303
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        answer: '{{#llm.text#}}'
+        desc: Generate response for the user
         selected: false
-        sourcePosition: right
-        targetPosition: left
-        type: custom
-        width: 244
+        title: Answer
+        type: answer
+        variables: []
+      height: 146
+      id: answer
+      position:
+        x: 990
+        y: 303
+      positionAbsolute:
+        x: 990
+        y: 303
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
     viewport:
       x: 0
       y: 0
       zoom: 0.7
+  rag_pipeline_variables: []
