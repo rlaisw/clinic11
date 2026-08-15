@@ -1,4 +1,4 @@
-"""Generate Dify workflow YAML in proper YAML format (not JSON flow style)."""
+"""Generate Dify workflow YAML in proper block format."""
 import os
 
 FILEPATH = os.path.join(os.path.dirname(__file__), "dify_workflow.yml")
@@ -77,7 +77,7 @@ workflow:
         sourceType: start
         targetType: http-request
       id: start-to-http
-      source: start
+      source: '1776072202913'
       sourceHandle: source
       target: http_node
       targetHandle: target
@@ -119,7 +119,7 @@ workflow:
         type: start
         variables: []
       height: 100
-      id: start
+      id: '1776072202913'
       position:
         x: 30
         y: 303
@@ -164,6 +164,27 @@ workflow:
         y: 303
       positionAbsolute:
         x: 350
+        y: 303
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 242
+      zIndex: 0
+    - data:
+        answer: '{{#llm.text#}}'
+        desc: ''
+        selected: false
+        title: Answer
+        type: answer
+        variables: []
+      height: 146
+      id: answer
+      position:
+        x: 990
+        y: 303
+      positionAbsolute:
+        x: 990
         y: 303
       selected: false
       sourcePosition: right
@@ -225,27 +246,6 @@ If no relevant records, say so.'
       type: custom
       width: 242
       zIndex: 0
-    - data:
-        answer: '{{#llm.text#}}'
-        desc: ''
-        selected: false
-        title: Answer
-        type: answer
-        variables: []
-      height: 146
-      id: answer
-      position:
-        x: 990
-        y: 303
-      positionAbsolute:
-        x: 990
-        y: 303
-      selected: false
-      sourcePosition: right
-      targetPosition: left
-      type: custom
-      width: 242
-      zIndex: 0
     viewport:
       x: 0
       y: 0
@@ -256,6 +256,5 @@ If no relevant records, say so.'
 with open(FILEPATH, "w", encoding="utf-8") as f:
     f.write(yaml_content)
 
-print(f"Written {FILEPATH}")
-print("Lines:", len(yaml_content.strip().splitlines()))
-print("Try importing this YAML in Dify Studio -> Create App -> Import DSL File")
+print(f"Written {FILEPATH} ({len(yaml_content.strip().splitlines())} lines)")
+print("Node order: start -> http_node -> answer -> llm")
