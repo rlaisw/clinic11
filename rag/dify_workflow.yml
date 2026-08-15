@@ -1,5 +1,5 @@
 app:
-  description: Answer clinic questions using semantic RAG search over patient records
+  description: ''
   icon: ''
   icon_background: '#FFEAD5'
   icon_type: emoji
@@ -56,7 +56,6 @@ workflow:
     - Show me patients with headache
     - What medications are prescribed?
     - List recent sick leave certificates
-    - Find receipts with diagnosis of fever
     suggested_questions_after_answer:
       enabled: true
     text_to_speech:
@@ -109,9 +108,9 @@ workflow:
       zIndex: 0
     nodes:
     - data:
-        desc: Capture user's chat messages and files.
+        desc: ''
         selected: false
-        title: User Input
+        title: Start
         type: start
         variables: []
       height: 100
@@ -129,7 +128,7 @@ workflow:
       width: 242
       zIndex: 0
     - data:
-        desc: Search clinic data via RAG API
+        desc: ''
         title: Clinic RAG Search
         type: http-request
         method: post
@@ -173,7 +172,7 @@ workflow:
           variable_selector:
           - http_node
           - body
-        desc: Generate answer based on RAG search results
+        desc: ''
         memory:
           query_prompt_template: '{{#sys.query#}}'
           role_prefix:
@@ -190,22 +189,18 @@ workflow:
           name: gpt-4o
           provider: openai
         prompt_template:
-        - id: system-prompt-rag
+        - id: sys-prompt
           role: system
-          text: |-
-            You are a medical clinic assistant. Answer the doctor's question using ONLY the clinic records provided below.
+          text: 'You are a medical clinic assistant. Answer using ONLY the clinic records.
 
-            Rules:
-            - Answer concisely based only on the provided context.
-            - If the context contains relevant records, summarize them clearly.
-            - If the context doesn't contain relevant information, say "No relevant clinic records found for this question."
-            - Do NOT make up information or use external knowledge.
-            - Cite the source type (patient, sick_leave_certificate, receipt, etc.) for each piece of information.
+Context:
+{{#http_node.body#}}
 
-            Context from clinic database:
-            {{#http_node.body#}}
+Question: {{#sys.query#}}
 
-            Question: {{#sys.query#}}
+If no relevant records, say so.'
+        - role: user
+          text: '{{#sys.query#}}'
         selected: false
         title: LLM
         type: llm
@@ -227,7 +222,7 @@ workflow:
       zIndex: 0
     - data:
         answer: '{{#llm.text#}}'
-        desc: Generate response for the user
+        desc: ''
         selected: false
         title: Answer
         type: answer
