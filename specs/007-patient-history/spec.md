@@ -107,42 +107,6 @@ GET /api/visit-summaries/
 - Auth: Doctor/staff role required
 ```
 
-## Non-Functional Requirements
-
-- **Response Time**: API responses under 1 second for 95% of requests; page loads under 2 seconds
-- **Availability**: 99.9% uptime during clinic operating hours (8am–8pm)
-- **Concurrency**: Support 50+ simultaneous doctors without degradation
-- **Data Retention**: Visit records retained for minimum 7 years per clinic compliance
-- **Security**: HIPAA-equivalent encryption (AES-256 at rest, TLS 1.3 in transit)
-- **Scalability**: Horizontal scaling support for patient data growth up to 500K records
-
-## Error Handling
-
-- **Validation Errors**: Return 400 with structured JSON: `{"field": "patient_name", "message": "Required", "code": "REQUIRED_FIELD"}`
-- **Not Found**: Return 404 for missing patients/visits/certificates
-- **Auth Errors**: Return 401/403 with clear "Access denied" messaging
-- **Concurrent Edit Conflicts**: Return 409 Conflict with retry guidance
-- **PDF Generation Failure**: Return 503 with "Service temporarily unavailable, please retry"
-- **Logging**: All errors logged to centralized system with trace IDs
-
-## Integration Testing
-
-- **Certificate Flow Test**: Create visit → issue certificate → verify QR code → revoke → confirm expired status
-- **Receipt Flow Test**: Create visit → generate receipt → verify QR code → void → confirm status
-- **Combined Flow Test**: Create visit → issue both certificate and receipt → verify both QR codes → confirm linkage
-- **Permission Test**: Verify doctors can create, patients can view, public can verify
-- **Edge Case Tests**: Missing patient data, expired tokens, concurrent requests, network failures
-
-## Timeline & Milestones
-
-| Phase | Duration | Deliverables |
-|-------|----------|--------------|
-| Setup & Foundation | Week 1 | Project structure, DB schema, auth, API routing |
-| User Story 1 (MVP) | Week 2 | VisitSummary model, CRUD API, frontend tab |
-| User Story 2 | Week 3 | Certificate + receipt integration, QR code linking |
-| Testing & Polish | Week 4 | Integration tests, error handling, performance tuning |
-| Deployment | Week 5 | Staging validation, production rollout, documentation |
-
 ## Success Criteria
 
 - [ ] Doctors can issue sick leave certificate + generate receipt in under 3 minutes
@@ -163,14 +127,12 @@ GET /api/visit-summaries/
 
 ## Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|-----------|--------|------------|
-| Data inconsistency between certificate and receipt | Medium | High | Single VisitSummary entity links both; atomic operations |
-| Complex UI combining two different document types | Medium | Medium | Consistent tab pattern; separate sections with clear headers |
-| Performance degradation with combined data | Low | High | Efficient queries; lazy loading; cached summaries |
-| Doctor confusion about when to use which document | Low | Low | Clear UI guidance; tooltips; role-based visibility |
-| Concurrent access conflicts | Medium | High | Versioned optimistic locking with retry logic |
-| SSL/TLS certificate expiry | Low | Critical | Automated renewal alerts 30 days before expiry
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Data inconsistency between certificate and receipt | Confused users, compliance issues | Single VisitSummary entity links both; atomic operations |
+| Complex UI combining two different document types | Poor user experience | Consistent tab pattern; separate sections with clear headers |
+| Performance degradation with combined data | Slow page loads | Efficient queries; lazy loading; cached summaries |
+| Doctor confusion about when to use which document | Workflow errors | Clear UI guidance; tooltips; role-based visibility |
 
 ## Dependencies
 

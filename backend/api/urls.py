@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .views import PatientViewSet, QueueEntryViewSet, ActiveMedicationViewSet, PastMedicationViewSet, AllergyViewSet, PrescriptionMedicationViewSet, SickLeaveCertificateViewSet, VerifyCertificateView, ShareLinkDownloadView, SrefPreviewView, VisitSummaryViewSet
+from .views import PatientViewSet, QueueEntryViewSet, ActiveMedicationViewSet, PastMedicationViewSet, AllergyViewSet, PrescriptionMedicationViewSet, SickLeaveCertificateViewSet, VerifyCertificateView, ShareLinkDownloadView, SrefPreviewView
 from .receipts.views import ReceiptViewSet, VerifyReceiptView
 
 router = DefaultRouter()
@@ -13,7 +13,6 @@ router.register(r'allergies', AllergyViewSet, basename='allergy')
 router.register(r'prescriptions', PrescriptionMedicationViewSet, basename='prescription')
 router.register(r'sick-leave-certificates', SickLeaveCertificateViewSet, basename='sick-leave-certificate')
 router.register(r'receipts', ReceiptViewSet, basename='receipt')
-router.register(r'visit-summaries', VisitSummaryViewSet, basename='visit-summary')
 
 urlpatterns = [
     path('', include(router.urls)),

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Patient, MedicalHistory, EmergencyContact, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink, Receipt, ReceiptCounter, VisitSummary
+from .models import Patient, MedicalHistory, EmergencyContact, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink, Receipt, ReceiptCounter
 
 
 class MedicalHistorySerializer(serializers.ModelSerializer):
@@ -196,26 +196,3 @@ class ReceiptListSerializer(serializers.ModelSerializer):
 
 class ReceiptVerifySerializer(serializers.Serializer):
     token = serializers.CharField()
-
-
-class VisitSummarySerializer(serializers.ModelSerializer):
-    certificate_details = SickLeaveCertificateListSerializer(source='certificate', read_only=True)
-
-    class Meta:
-        model = VisitSummary
-        fields = [
-            'id', 'patient', 'doctor_name', 'doctor_display_name',
-            'clinic_name', 'clinic_address', 'patient_name', 'patient_hkid',
-            'visit_date', 'visit_type', 'diagnosis', 'notes', 'status',
-            'certificate', 'certificate_details',
-            'receipt',
-            'created_at', 'updated_at',
-        ]
-        read_only_fields = ['id', 'created_at', 'updated_at']
-
-
-class VisitSummaryListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VisitSummary
-        fields = ['id', 'patient_name', 'visit_date', 'visit_type', 'diagnosis', 'status']
-        read_only_fields = fields

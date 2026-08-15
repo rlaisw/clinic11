@@ -16,11 +16,11 @@
 - [x] Features listed with clear descriptions
 - [x] User roles and permissions defined
 - [x] Requirements are actionable and testable
-- [x] Non-functional qualities defined (response time, availability, concurrency, data retention, security, scalability)
-- [x] Error handling specifics defined (HTTP codes, structured JSON responses, retry guidance)
-- [x] Integration testing plan with existing systems (certificate flow, receipt flow, combined flow, permission tests, edge cases)
-- [x] Timeline/milestones defined (5-week phased delivery with deliverables)
-- [x] Risk assessment matrix with likelihood/probability added
+- [ ] **Missing**: Non-functional qualities (performance targets beyond response time)
+- [ ] **Missing**: Detailed error handling specifics
+- [ ] **Missing**: Integration testing plan with existing systems
+- [ ] **Missing**: Timeline/milestones
+- [ ] **Missing**: Risk assessment matrix with likelihood/probability
 
 ### Suggested Improvements
 1. Add explicit non-functional quality targets:

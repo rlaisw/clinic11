@@ -9,7 +9,6 @@ import { DataVisualizationTab } from "@/components/doctor/data-visualization-tab
 import { PrescriptionTabs } from "@/components/doctor/prescription-tabs";
 import { SickLeaveCertificateTabs } from "@/components/doctor/sick-leave-certificate-tabs";
 import { ReceiptTabs } from "@/components/doctor/receipt-tabs";
-import { VisitSummaryTabs } from "@/components/doctor/visit-summary-tabs";
 import { useUser } from "@/contexts/user-context";
 import { cn } from "@/lib/utils";
 
@@ -52,9 +51,7 @@ export default function DoctorPatientLayout({
           ? "sick-leave-certificate"
           : pathname.includes("/receipt")
             ? "receipt"
-            : pathname.includes("/visit-summary")
-              ? "visit-summary"
-              : pathname.includes("/ai-chatbot")
+            : pathname.includes("/ai-chatbot")
               ? "ai-chatbot"
               : "profile";
 
@@ -112,17 +109,6 @@ export default function DoctorPatientLayout({
             )}
           >
             Prescription
-          </Link>
-          <Link
-            href={`/doctor/patients/${id}/visit-summary`}
-            className={cn(
-              "px-3 py-2 text-sm font-medium border-b-2",
-              currentTab === "visit-summary"
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Visit Summary
           </Link>
           <Link
             href={`/doctor/patients/${id}/receipt`}
@@ -188,12 +174,6 @@ export default function DoctorPatientLayout({
       {currentTab === "prescriptions" && (
         <div className="mt-4">
           <PrescriptionTabs patientId={id} disabled={!isDoctor} />
-        </div>
-      )}
-
-      {currentTab === "visit-summary" && (
-        <div className="mt-4">
-          <VisitSummaryTabs patientId={id} />
         </div>
       )}
 

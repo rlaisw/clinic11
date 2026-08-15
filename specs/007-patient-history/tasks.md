@@ -1,65 +1,59 @@
 # Tasks: Patient History Feature Implementation
 
-## Phase 1: Setup
+## Phase 1: Setup (Parallelizable)
 
-- [x] T001 Create project structure per implementation plan
-- [x] T002 Initialize required dependencies
-- [x] T003 Configure linting and formatting tools
-
----
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize Python project with required dependencies
+- [ ] T003 Configure linting and formatting tools
+- [ ] T004 Setup database schema and migrations framework
+- [ ] T005 Implement authentication/authorization framework
+- [ ] T006 Setup API routing and middleware structure
+- [ ] T007 Create base models/entities that all stories depend on
+- [ ] T008 Configure error handling and logging infrastructure
+- [ ] T009 Setup environment configuration management
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-- [ ] T004 Setup database schema and migrations framework
-- [ ] T005 Configure environment configuration management
-- [ ] T006 Configure error handling and logging infrastructure
+- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
+- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T014 [US1] Implement [Service] in src/services/[service].py
+- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T016 [US1] Add validation and error handling
+- [ ] T017 [US1] Add logging for user story 1 operations
 
----
+## Phase 3: User Story 1 - Patient History Feature (Priority P1)
 
-## Phase 3: User Story 1 - Patient History Feature (Priority P1) 🎯 MVP
-
-**Goal**: Create VisitSummary model, CRUD API, and frontend tab for unified patient visit view
-
-**Independent Test**: Create a visit via API → retrieve summary → verify certificate and receipt linkage
-
-### Implementation for User Story 1
-
-- [x] T007 [P] [US1] Create VisitSummary model in backend/api/models.py
-- [x] T008 [P] [US1] Create VisitSummary serializer in backend/api/serializers.py
-- [x] T009 [US1] Create VisitSummary viewset in backend/api/views.py
-- [x] T010 [US1] Register VisitSummary URLs in backend/api/urls.py
-- [x] T011 [US1] Add VisitSummary admin configuration in backend/api/admin.py
-- [x] T012 [US1] Create VisitSummary tab page in apps/web/app/(dashboard)/doctor/patients/[id]/visit-summary/page.tsx
-- [x] T013 [US1] Create VisitSummary frontend API hooks in apps/web/hooks/use-visit-summaries.ts
-- [x] T014 [US1] Add validation and error handling for visit summary operations
-- [ ] T015 [US1] Add audit logging for visit summary operations
-
-**Checkpoint**: Visit summary CRUD operational and independently testable
-
----
+- [ ] T012 [P] [US1] Create Patient model in src/models/patient.py
+- [ ] T013 [P] [US1] Create VisitSummary model in src/models/visit_summary.py
+- [ ] T014 [P] [US1] Implement PatientHistoryService in src/services/patient_history.py
+- [ ] T015 [P] [US1] Implement PatientHistoryController in src/controllers/patient_history.py
+- [ ] T016 [P] [US1] Add validation and error handling for patient history operations
+- [ ] T017 [US1] Add logging for patient history operations
 
 ## Phase 4: User Story 2 - Extended Features (Priority P2)
 
-**Goal**: Integrate certificate and receipt linking with visit summaries
+- [ ] T018 [P] [US2] Create Receipt model in src/models/receipt.py
+- [ ] T019 [P] [US2] Implement ReceiptService in src/services/receipt_service.py
+- [ ] T020 [P] [US2] Implement ReceiptController in src/controllers/receipt_controller.py
+- [ ] T021 [P] [US2] Integrate with Patient History components (if needed)
 
-### Implementation for User Story 2
+## Phase 5: User Story 3 - Polishing & Cross-Cutting (Priority P3)
 
-- [ ] T016 [P] [US2] Add certificate linking to VisitSummary model
-- [ ] T017 [P] [US2] Add receipt linking to VisitSummary model
-- [ ] T018 [US2] Create visit summary - certificate association logic in backend
-- [ ] T019 [US2] Create visit summary - receipt association logic in backend
-- [ ] T020 [US2] Add frontend display for linked certificates and receipts
+- [ ] T024 [P] [US3] Create documentation for patient history feature
+- [ ] T025 [P] [US3] Refactor code for readability and maintainability
+- [ ] T026 [P] [US3] Performance optimization across all stories
+- [ ] T027 [P] [US3] Cross-cutting security hardening
+- [ ] T028 [P] [US3] Final test validation for all user stories
 
-**Checkpoint**: Certificate and receipt linkage functional
+## Phase 6: Polish & Cross-Cutting Concerns
 
----
-
-## Phase 5: Polish & Cross-Cutting Concerns
-
-- [ ] T021 Create documentation for patient history feature
-- [ ] T022 [P] Run integration tests and fix issues
-- [ ] T023 [P] Performance optimization and security hardening
-- [ ] T024 [P] Final validation and deploy readiness check
+- [ ] TXXX [P] Documentation updates in docs/
+- [ ] TXXX Code cleanup and refactoring
+- [ ] TXXX Performance optimization across all stories
+- [ ] TXXX Final regression testing
+- [ ] TXXX Deploy readiness check
 
 ## Dependencies & Execution Order
 

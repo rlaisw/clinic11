@@ -8,8 +8,8 @@ from django.db.models import Q
 from django.db import transaction
 from django.conf import settings
 from datetime import date
-from .models import Patient, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink, Receipt, VisitSummary
-from .serializers import PatientSerializer, QueueEntrySerializer, QueueCheckInSerializer, PatientBackgroundSerializer, ActiveMedicationSerializer, PastMedicationSerializer, AllergySerializer, PrescriptionMedicationSerializer, SickLeaveCertificateSerializer, SickLeaveCertificateListSerializer, ShareLinkSerializer, VisitSummarySerializer, VisitSummaryListSerializer
+from .models import Patient, QueueEntry, PatientBackground, ActiveMedication, PastMedication, Allergy, PrescriptionMedication, SickLeaveCertificate, ShareLink
+from .serializers import PatientSerializer, QueueEntrySerializer, QueueCheckInSerializer, PatientBackgroundSerializer, ActiveMedicationSerializer, PastMedicationSerializer, AllergySerializer, PrescriptionMedicationSerializer, SickLeaveCertificateSerializer, SickLeaveCertificateListSerializer, ShareLinkSerializer
 from .utils import generate_qr_code_token, generate_qr_code_image_base64, generate_qr_code_image_from_data, generate_certificate_pdf_from_template, compute_expiry_date, verify_qr_code_token
 
 
@@ -394,57 +394,3 @@ class ShareLinkDownloadView(generics.GenericAPIView):
         return HttpResponse(pdf_bytes, content_type='application/pdf', headers={
             'Content-Disposition': f'attachment; filename="sick-leave-certificate-{certificate.id}.pdf"'
         })
-
-
-class VisitSummaryViewSet(viewsets.ModelViewSet):
-    queryset = VisitSummary.objects.all()
-    serializer_class = VisitSummarySerializer
-    permission_classes = [DoctorPermission]
-
-    def get_queryset(self):
-        qs = VisitSummary.objects.all()
-        patient_id = self.request.query_params.get("patient")
-        if patient_id:
-            qs = qs.filter(patient_id=patient_id)
-        return qs
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return VisitSummaryListSerializer
-        return VisitSummarySerializer
-
-    def perform_create(self, serializer):
-        serializer.save(
-            doctor_name=self.request.user.get_full_name() or self.request.user.username,
-            doctor_display_name=getattr(self.request.user.profile, 'display_name', '') or '',
-            clinic_name=getattr(self.request.user.profile, 'clinic_name', '') or '',
-            clinic_address=getattr(self.request.user.profile, 'clinic_address', '') or '',
-        )
-
-    @action(detail=True, methods=['post'])
-    def link_certificate(self, request, pk=None):
-        visit = self.get_object()
-        certificate_id = request.data.get('certificate_id')
-        if not certificate_id:
-            return Response({'error': 'certificate_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            certificate = SickLeaveCertificate.objects.get(id=certificate_id)
-        except SickLeaveCertificate.DoesNotExist:
-            return Response({'error': 'Certificate not found'}, status=status.HTTP_404_NOT_FOUND)
-        visit.certificate = certificate
-        visit.save()
-        return Response({'status': 'certificate linked'})
-
-    @action(detail=True, methods=['post'])
-    def link_receipt(self, request, pk=None):
-        visit = self.get_object()
-        receipt_id = request.data.get('receipt_id')
-        if not receipt_id:
-            return Response({'error': 'receipt_id is required'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            receipt = Receipt.objects.get(id=receipt_id)
-        except Receipt.DoesNotExist:
-            return Response({'error': 'Receipt not found'}, status=status.HTTP_404_NOT_FOUND)
-        visit.receipt = receipt
-        visit.save()
-        return Response({'status': 'receipt linked'})

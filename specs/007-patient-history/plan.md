@@ -155,13 +155,13 @@ E2E Tests:
 
 ## Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation Strategy |
-|------|-----------|--------|---------------------|
-| Data inconsistency in certificate-receipt linkage | Medium | High | Use atomic transactions with versioned updates |
-| Performance degradation with complex joins | Low | High | Implement proper indexing and denormalized caching where safe |
-| User confusion about multiple document types | Medium | Medium | Clear visual hierarchy and consistent iconography |
-| Concurrent access conflicts | Medium | High | Implement versioned optimistic locking |
-| Compliance edge cases | Low | High | Follow clinic's existing compliance checklist |
+| Risk | Impact | Mitigation Strategy |
+|------|--------|---------------------|
+| Data inconsistency in certificate-receipt linkage | Correctness issues | Use atomic transactions with versioned updates |
+| Performance degradation with complex joins | Slow queries | Implement proper indexing and denormalized caching where safe |
+| User confusion about multiple document types | UX friction | Clear visual hierarchy and consistent iconography |
+| Concurrent access conflicts | Data corruption | Implement versioned optimistic locking |
+| Compliance edge cases | Regulatory issues | Follow clinic's existing compliance checklist |
 
 ## Next Steps
 1. Run `/speckit.plan` to generate detailed technical plan
