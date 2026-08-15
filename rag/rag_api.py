@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import sys
-import os
+import sys, os
+from sentence_transformers import SentenceTransformer
 
 sys.path.insert(0, os.path.dirname(__file__))
-from rag_engine import search_clinic, index_clinic_data
+from rag_engine import search
+from cocoindex_pipeline import run_pipeline
 
-app = FastAPI(title="Clinic RAG API", version="1.0.0")
+app = FastAPI(title="Clinic RAG API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+MODEL = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 class QueryRequest(BaseModel):
@@ -37,14 +40,16 @@ def health():
 def query_rag(req: QueryRequest):
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
-    results = search_clinic(req.query, req.top_k)
-    return QueryResponse(results=results, total=len(results))
+    emb = MODEL.encode(req.query).tolist()
+    results = search(emb, req.top_k)
+    cleaned = [{k: v for k, v in r.items() if k != "embedding"} for r in results]
+    return QueryResponse(results=cleaned, total=len(cleaned))
 
 
 @app.post("/reindex")
 def reindex():
     try:
-        count = index_clinic_data()
+        count = run_pipeline()
         return {"status": "ok", "records_indexed": count}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

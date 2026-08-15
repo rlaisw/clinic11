@@ -1,14 +1,10 @@
 """
-File Watcher + Auto-Indexer for Clinic RAG
-Monitors data/files/ for new content and re-indexes LanceDB
+File Watcher: monitors data/files/ for changes, triggers CocoIndex pipeline.
 """
-import os
-import sys
-import time
-import hashlib
+import os, sys, time, hashlib
 
 sys.path.insert(0, os.path.dirname(__file__))
-from rag_engine import index_clinic_data
+from cocoindex_pipeline import run_pipeline
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "files")
 STATE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "coco_state")
@@ -62,8 +58,8 @@ def watch_and_index(interval: int = 30):
                 changed = True
         save_state(state)
         if changed:
-            print("Re-indexing clinic data...")
-            count = index_clinic_data()
+            print("Re-indexing via CocoIndex pipeline...")
+            count = run_pipeline()
             print(f"Indexed {count} records")
         time.sleep(interval)
 
