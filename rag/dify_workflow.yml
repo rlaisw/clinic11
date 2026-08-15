@@ -1,0 +1,122 @@
+version: "1.0"
+app:
+  name: Clinic RAG Chat
+  description: Answer clinic questions using semantic RAG search over patient records, sick leave certificates, and receipts
+  icon: 🤖
+  icon_background: "#FFEAD5"
+  mode: workflow
+  features:
+    opening_statement: ""
+    suggested_questions:
+      - Show me patients with headache
+      - What medications are prescribed?
+      - List recent sick leave certificates
+      - Find receipts with diagnosis of fever
+    suggested_questions_after_answer:
+      enabled: true
+  permissions:
+    who_can_access: all_users
+
+nodes:
+  - id: start
+    type: start
+    title: Start
+    position:
+      x: 100
+      y: 100
+    config:
+      variables:
+        - variable: query
+          label: Your Question
+          type: text-input
+          required: true
+          max_length: 500
+
+  - id: http_request
+    type: http-request
+    title: Clinic RAG Search
+    position:
+      x: 100
+      y: 300
+    config:
+      method: post
+      url: http://172.28.51.11:8001/query
+      authorization:
+        type: no-auth
+      headers:
+        Content-Type: application/json
+      body:
+        type: raw
+        content: '{"query": "{{#start.query#}}", "top_k": 5}'
+
+  - id: llm
+    type: llm
+    title: Generate Answer from RAG Results
+    position:
+      x: 100
+      y: 500
+    config:
+      model:
+        provider: openai
+        name: gpt-4o
+        mode: chat
+        completion_params:
+          temperature: 0.3
+          max_tokens: 1024
+      memory:
+        enabled: false
+      prompt_template:
+        - role: system
+          text: |-
+            You are a helpful medical clinic assistant. Your job is to answer the doctor's questions using ONLY the clinic records provided below.
+
+            Rules:
+            - Answer concisely based only on the provided context.
+            - If the context contains relevant records, summarize them clearly.
+            - If the context doesn't contain relevant information, say "No relevant clinic records found for this question."
+            - Do NOT make up information or use external knowledge.
+            - Cite the source type (patient, sick_leave_certificate, receipt, etc.) for each piece of information.
+
+            Context from clinic database:
+            {{#http_request.body#}}
+
+            Question: {{#start.query#}}
+        - role: user
+          text: "{{#start.query#}}"
+      context:
+        enabled: true
+        variable_selector:
+          - http_request
+          - body
+
+  - id: end
+    type: end
+    title: End
+    position:
+      x: 100
+      y: 700
+    config:
+      outputs:
+        - variable: answer
+          value:
+            type: variable
+            variable_selector:
+              - llm
+              - text
+
+edges:
+  - id: edge-start-http
+    source: start
+    target: http_request
+    source_handle: start
+    target_handle: http_request
+  - id: edge-http-llm
+    source: http_request
+    target: llm
+    source_handle: http_request
+    target_handle: llm
+  - id: edge-llm-end
+    source: llm
+    target: end
+    source_handle: llm
+    target_handle: end
